@@ -1,0 +1,598 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>גינת מרפסת דנה</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+.vlab{font-size:.84rem;color:var(--muted);align-self:center;padding:0 4px}
+#varSel{max-width:70vw}
+.cmp{margin:14px 0 22px}
+.cmp button{margin-bottom:4px}
+.cmp .note{margin:.2rem 0 .5rem}
+:root{
+  --sky:#e9ecea; --ink:#1f2a24; --muted:#5b6a61;
+  --panel:rgba(255,255,255,.88); --line:rgba(31,42,36,.16);
+  --leaf:#2f6b3a; --leaf-ink:#ffffff; --off:#eef1ee; --warn:#8a5a00; --warnbg:#fff4df;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --sky:#161d1b; --ink:#e7efe9; --muted:#9fb0a6;
+    --panel:rgba(26,34,31,.88); --line:rgba(231,239,233,.18);
+    --leaf:#6fbf7d; --leaf-ink:#0f1a13; --off:#222b27; --warn:#f0c46b; --warnbg:#3a3020;
+  }
+}
+*,*::before,*::after{box-sizing:inherit}
+html,body{height:100%;margin:0}
+body{background:var(--sky);color:var(--ink);font-family:"Heebo","Arial Hebrew","Arial",sans-serif;overflow:hidden}
+#stage{position:fixed;inset:0;touch-action:none}
+#stage canvas{display:block;width:100%;height:100%}
+.head{position:fixed;top:calc(env(safe-area-inset-top,0px) + 12px);right:14px;left:14px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;pointer-events:none;z-index:3}
+.title{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:10px 14px;backdrop-filter:blur(8px);pointer-events:auto;max-width:min(72vw,440px)}
+.title h1{font-size:1.05rem;line-height:1.25;margin:0;font-weight:700}
+.title p{margin:.2rem 0 0;font-size:.82rem;color:var(--muted);line-height:1.4}
+.views{display:flex;gap:6px;pointer-events:auto;flex-wrap:wrap;justify-content:flex-end}
+.dock{position:fixed;right:14px;left:14px;bottom:calc(env(safe-area-inset-bottom,0px) + 12px);display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none;z-index:2}
+.chips{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:8px;backdrop-filter:blur(8px);pointer-events:auto;max-width:100%}
+.sep{width:1px;background:var(--line);margin:2px 2px}
+button,select{font:inherit;color:var(--ink);background:var(--off);border:1px solid var(--line);border-radius:999px;padding:7px 13px;font-size:.86rem;cursor:pointer;min-height:36px}
+button[aria-pressed="true"],.views button[aria-selected="true"]{background:var(--leaf);color:var(--leaf-ink);border-color:transparent;font-weight:500}
+button:focus-visible,select:focus-visible{outline:2px solid var(--leaf);outline-offset:2px}
+.views button{background:var(--panel);backdrop-filter:blur(8px)}
+.hint{font-size:.78rem;color:var(--muted);background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:4px 12px;pointer-events:none;text-align:center}
+.fail{position:fixed;inset:0;display:none;align-items:center;justify-content:center;padding:24px;text-align:center;font-size:1rem;line-height:1.6}
+.pane{position:fixed;inset:0;overflow:auto;background:var(--sky);padding:calc(env(safe-area-inset-top,0px) + 84px) 14px calc(env(safe-area-inset-bottom,0px) + 24px);z-index:2}
+.pane[hidden]{display:none}
+.sheetbox{max-width:980px;margin:0 auto;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:16px}
+.sheetbox.wide{max-width:1400px}
+.sheetbox h2{font-size:1.1rem;margin:0 0 .2rem}
+.sheetbox h3{font-size:.98rem;margin:1.1rem 0 .4rem}
+.note{color:var(--muted);font-size:.85rem;margin:0 0 .8rem;line-height:1.5}
+.svgwrap{overflow-x:auto;background:#fff;border-radius:8px}
+.svgwrap svg{display:block;min-width:760px;width:100%;height:auto}
+table{width:100%;border-collapse:collapse;font-size:.9rem;line-height:1.45}
+th,td{border:1px solid var(--line);padding:7px 9px;text-align:right;vertical-align:top}
+thead th{background:var(--off);font-weight:500}
+td.n{white-space:nowrap;width:1%}
+tfoot td{font-weight:700;background:var(--off)}
+.tag{display:inline-block;font-size:.72rem;padding:1px 8px;border-radius:999px;background:var(--off);border:1px solid var(--line);color:var(--muted);margin-inline-start:4px}
+.warn{color:var(--warn);background:var(--warnbg);border-radius:10px;padding:8px 12px;font-size:.85rem;line-height:1.55}
+ul.as{margin:.3rem 0;padding-inline-start:1.2rem;font-size:.88rem;line-height:1.65}
+.pick{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:8px}
+.pick label{font-size:.85rem;color:var(--muted)}
+.pick select{width:100%;border-radius:10px;margin-top:3px}
+.pick{grid-template-columns:repeat(auto-fill,minmax(240px,1fr))}
+.pk{border:1px solid #dfe5dc;border-radius:12px;padding:8px 10px;display:grid;gap:6px}
+.pk b{font-size:.9rem;font-weight:600}
+.slotH{width:100%;margin:6px 0 2px;font-size:.85rem;font-weight:600}
+body.paneOpen .dock{display:none}
+body.paneOpen .title{visibility:hidden}
+#sheet{position:fixed;right:14px;left:14px;bottom:calc(env(safe-area-inset-bottom,0px) + 12px);z-index:4;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:12px 14px;backdrop-filter:blur(10px);max-width:560px;margin:0 auto}
+#sheet[hidden]{display:none}
+#sheet h4{margin:0 0 .15rem;font-size:1rem}
+#sheet p{margin:0 0 .5rem;color:var(--muted);font-size:.84rem;line-height:1.5}
+#sheet .opts{display:flex;flex-wrap:wrap;gap:6px}
+#sheet .close{position:absolute;left:10px;top:8px;min-height:30px;padding:3px 10px}
+body.sheetOpen .dock{display:none}
+@media (max-width:560px){ .title p{display:none} .title h1{font-size:.95rem} button{padding:6px 10px;font-size:.8rem;min-height:34px} }
+</style>
+</head>
+<body>
+<div id="stage" aria-label="מודל תלת־ממד של המרפסת. גוררים כדי לסובב, נוגעים באדנית כדי לבחור צמח"></div>
+
+<div class="head">
+  <div class="title">
+    <h1>גינת מרפסת דנה</h1>
+    <p>890 × 145, תקרה 274. 7 אדניות 53×30×25, 7 עציצים תלויים, מטפס על הבלוקים. ארונית 100×30×170 ומזגן בקיר המערבי.</p>
+  </div>
+</div>
+
+<div class="dock">
+  <div class="chips" id="varchips" style="display:none"><label for="varSel" class="vlab">הצעה</label><select id="varSel"></select></div>
+  <div class="chips" id="camchips">
+    <button type="button" data-view="overview" aria-pressed="true">כללי</button>
+    <button type="button" data-view="eye" aria-pressed="false">מהמרפסת</button>
+    <button type="button" data-view="east" aria-pressed="false">קיר מזרחי</button>
+    <button type="button" data-view="top" aria-pressed="false">מלמעלה</button>
+    <span class="sep"></span>
+    <button type="button" data-tog="dims" aria-pressed="true">מידות</button>
+    <button type="button" data-tog="cab" aria-pressed="true">ארונית</button>
+    <button type="button" data-tog="cabopen" aria-pressed="false">ארונית פתוחה</button>
+    <button type="button" data-tog="ceil" aria-pressed="false">תקרה</button>
+    <button type="button" data-tog="west" aria-pressed="false">קיר מערבי</button>
+  </div>
+  <div class="hint" id="hint">גוררים כדי לסובב · שתי אצבעות להתקרב · נגיעה באדנית כדי לבחור צמח</div>
+</div>
+
+<div id="sheet" hidden role="dialog" aria-label="בחירת צמח לאדנית">
+  <button type="button" class="close" id="sheetClose" aria-label="סגירה">✕</button>
+  <h4 id="sheetTitle"></h4>
+  <p id="sheetText"></p>
+  <div class="opts" id="sheetOpts"></div>
+</div>
+
+
+
+<div class="fail" id="fail">המודל לא נטען כי לא הייתה גישה לספריית התלת־ממד. השרטוט והרשימה עדיין זמינים בלשוניות למעלה.</div>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+// ---------- shared data ----------
+var LEN=890, W=145, H=274, SILL=127, T=20;
+var SEG=[{t:'wall',w:200},{t:'win',w:158},{t:'pillar',w:31},{t:'win',w:154},{t:'wall',w:194},{t:'win',w:153}];
+(function(){ var x=0; SEG.forEach(function(s){ s.x0=x; s.x1=x+s.w; x+=s.w; }); })();
+var NAMES={win:'פתח',wall:'קיר',pillar:'עמוד'};
+var HANG=[{x:50,p:'zygo',c:0x8b9a7a},{x:100,p:'hoya',c:0xc29a6a},{x:150,p:'zygo',c:0x8b9a7a},
+          {x:373.5,p:'hoya',c:0xc29a6a},
+          {x:591.5,p:'zygo',c:0x8b9a7a},{x:640,p:'hoya',c:0xc29a6a},{x:688.5,p:'zygo',c:0x8b9a7a}];
+var POT_BOTTOM=220, POT_H=20, POT_R=12.5, HOOK_Y=262, POT_Z=W-18;
+var PL_L=53, PL_D=30, PL_H=25, PL_Z0=W-2-PL_D;
+var WOMAN={x:529,z:62,h:170};
+var CAB={x0:579,l:100,d:30,h:170}; // cabinet on the west wall, on the woman's left (toward the window-153 end), as tall as she is
+// AC outdoor unit on the floor in the corner of the window-153 end and the west wall: back to that end (x=890, 10 off it), fan facing into the balcony (-x). w runs along the end (z), d along the balcony (x)
+var ACU={x0:850,z0:5,w:80,d:30,h:55};
+var EVEN9=[10,112.1,214.3,316.4,418.5,520.6,622.8,724.9,827], EVEN7=[10,146.2,282.3,418.5,554.7,690.8,827];
+var VARIANTS=[
+ {n:'שלושה סוגים', x:[23.5,123.5,252.5,439.5,565,662,787], p:['chamae','spath','trach','trach','spath','chamae','trach'], d:'מטפס בפתחים. בכל קיר זוג: צמח גבוה בצד החיצוני וצמח נמוך פורח בצד הפנימי – תמונת ראי בין שני הקירות.'}
+];
+var PLANTERS;
+function LEN_OF(i){ return VARIANTS[i].L||53; }
+function PER(L){ return 1; }
+function norm(c){ return [Array.isArray(c)?c[0]:c]; }
+function combo(c){ return SHORT[norm(c)[0]]; }
+var FLOOR={
+  chamae:{n:'חמדוריאה אלגנס',s:9,price:null,src:'',size:'עציץ 18',why:'דקל של צל, עולה מעל הבלוקים אל תוך הפתח'},
+  spath:{n:'ספאתיפילום',s:9,price:null,src:'',size:'עציץ 17',why:'פריחה לבנה בצל מואר'},
+  zamia:{n:'זמיקולקס',s:9,price:null,src:'',size:'עציץ 18',why:'הכי עמיד, כמעט בלי טיפול'},
+  fern:{n:'שרך בוסטון',s:9,price:null,src:'',size:'עציץ 15',why:'נשפך מעל דופן האדנית'},
+  pseud:{n:'פסאודרנתמום',s:7,price:null,src:'',size:'',why:'עלווה מגוונת; דוהה מעט בצל'},
+  cordy:{n:'קורדילין טנגו',s:6,price:null,src:'',size:'4 ליטר',why:'צבע בורדו – נחלש בצל'},
+  trach:{n:'יסמין כוכבים (טרכלוספרמון)',s:7,price:null,src:'',size:'',why:'מטפס על הבלוקים ונכנס לחורים; פריחה לבנה ריחנית, פחות פרחים בחצי צל',climb:1},
+  taberna:{n:'טברנה מונטנה',s:6,price:null,src:'',size:'10 ליטר',why:'שיח עם פרחים לבנים ריחניים; בצל מואר פורח פחות. מוהל חלבי – להרחיק מחיות'},
+  dieff:{n:'דיפנבכיה טרופיק',s:7,price:null,src:'',size:'עציץ 18',why:'עלים גדולים לבן־ירוק; רגישה לקור ולרוח, רעילה'},
+  stephan:{n:'סטפנוטיס',s:4,price:null,src:'',size:'7 ליטר',why:'דומה ליסמין ומטפס, אבל צריך יותר אור כדי לפרוח',climb:1}
+};
+var SHORT={chamae:'חמדוריאה',spath:'ספאתיפילום',zamia:'זמיה',fern:'שרך',pseud:'פסאודרנתמום',cordy:'קורדילין',trach:'יסמין',stephan:'סטפנוטיס',taberna:'טברנה',dieff:'דיפנבכיה'};
+var store={v:1,c:{}};
+var NONAMES=true;
+try{ var sv=JSON.parse(localStorage.getItem('danaBalconyV2')||'null'); if(sv && typeof sv.v==='number' && sv.c) store=sv; else { var o1=JSON.parse(localStorage.getItem('danaBalconyV1')||'null'); if(o1 && o1.c && o1.c[1]) store={v:0,c:{0:o1.c[1]}}; } }catch(e){}
+
+function variantChoice(i){ var c=store.c[i], d=VARIANTS[i].p; var ok=c && c.length===d.length && c.every(function(x){ return norm(x).every(function(k){return FLOOR[k];}); }); return (ok?c:d).map(norm); }
+var V=Math.max(0,Math.min(store.v,VARIANTS.length-1)); PLANTERS=VARIANTS[V].x; PL_L=LEN_OF(V); PL_H=VARIANTS[V].H||25; var choice=variantChoice(V);
+function saveChoice(){ store.v=V; store.c[V]=choice.map(function(c){return c.slice();}); try{ localStorage.setItem('danaBalconyV2',JSON.stringify(store)); }catch(e){} }
+var onVariant=null;
+function setVariant(i){ V=i; PLANTERS=VARIANTS[i].x; PL_L=LEN_OF(i); PL_H=VARIANTS[i].H||25; choice=variantChoice(i); saveChoice(); closeSheet(); renderBOM(); drawSVG(); var sel=document.getElementById('varSel'); if(sel) sel.value=String(i); if(onVariant) onVariant(); }
+
+// ---------- tabs ----------
+(function(){
+  var tabs=document.querySelectorAll('.views [role=tab]');
+  tabs.forEach(function(b){ b.addEventListener('click',function(){
+    tabs.forEach(function(t){ t.setAttribute('aria-selected', t===b?'true':'false'); });
+    var k=b.dataset.tab;
+    document.getElementById('pane-draw').hidden = k!=='draw';
+    document.getElementById('pane-list').hidden = k!=='list';
+    document.body.classList.toggle('paneOpen', k!=='model');
+    if(k!=='model') closeSheet();
+  }); });
+})();
+
+function renderBOM(){}
+var onChoice=null;
+function where(i){ var c=PLANTERS[i]+PL_L/2; var sg=SEG.filter(function(s){return c>=s.x0&&c<s.x1;})[0]; return (sg.t==='win'?'מתחת לפתח ':'מתחת לקיר ')+sg.w; }
+function setChoice(i,slot,k){ choice[i][slot]=k; saveChoice(); renderBOM(); drawSVG(); if(onChoice) onChoice(i); }
+
+function drawSVG(){}
+
+// ---------- sheet ----------
+var sheet=document.getElementById('sheet');
+function closeSheet(){ sheet.hidden=true; document.body.classList.remove('sheetOpen'); if(window.__hl) window.__hl(-1); }
+document.getElementById('sheetClose').addEventListener('click',closeSheet);
+function openPlanter(i){
+  document.getElementById('sheetTitle').textContent='אדנית '+(i+1)+' · '+where(i)+' · '+PL_L+'×'+PL_D+'×'+PL_H;
+  var c=choice[i];
+  document.getElementById('sheetText').textContent='כרגע: '+FLOOR[c[0]].n+' – '+FLOOR[c[0]].why+'. בוחרים צמח:';
+  var box=document.getElementById('sheetOpts'); box.innerHTML='';
+  c.forEach(function(cur,slot){
+    
+    Object.keys(FLOOR).forEach(function(k){
+      var b=document.createElement('button'); b.type='button'; b.textContent=SHORT[k]+' · '+FLOOR[k].s+'/10';
+      b.setAttribute('aria-pressed', k===cur?'true':'false');
+      b.addEventListener('click',function(){ setChoice(i,slot,k); openPlanter(i); });
+      box.appendChild(b);
+    });
+  });
+  sheet.hidden=false; document.body.classList.add('sheetOpen'); if(window.__hl) window.__hl(i);
+}
+function openHang(h){
+  var z=h.p==='zygo';
+  document.getElementById('sheetTitle').textContent=(z?'זיגוקקטוס':'בת שבע (הויה)')+' · עציץ תלוי';
+  document.getElementById('sheetText').textContent=(z?'קערה 15. 9/10 למרפסת. ':'כ־6/10 (הערכה): תגדל, הפריחה לא בטוחה באור צדדי. ')+'עציץ דמוי ראטן Ø25, עומק 20. תחתית ב־220.';
+  document.getElementById('sheetOpts').innerHTML='';
+  sheet.hidden=false; document.body.classList.add('sheetOpen');
+}
+
+// ---------- 3D ----------
+(function(){
+  if(!window.THREE || !THREE.OrbitControls){
+    document.getElementById('fail').style.display='flex';
+    document.getElementById('hint').style.display='none';
+    document.getElementById('camchips').style.display='none';
+    return;
+  }
+  var stage=document.getElementById('stage');
+  var renderer=new THREE.WebGLRenderer({antialias:true});
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
+  stage.appendChild(renderer.domElement);
+  var scene=new THREE.Scene();
+  scene.background=new THREE.Color(getComputedStyle(document.documentElement).getPropertyValue('--sky').trim()||'#e9ecea');
+  var camera=new THREE.PerspectiveCamera(45,1,2,9000);
+  var controls=new THREE.OrbitControls(camera,renderer.domElement);
+  controls.enableDamping=true; controls.dampingFactor=0.08;
+  controls.maxPolarAngle=Math.PI*0.495; controls.minDistance=30; controls.maxDistance=3000;
+
+  scene.add(new THREE.HemisphereLight(0xffffff,0x8a8f86,0.8));
+  var sun=new THREE.DirectionalLight(0xfff4e0,0.6); sun.position.set(300,500,1200); scene.add(sun); // from the east (+z), morning
+  var fill=new THREE.DirectionalLight(0xffffff,0.3); fill.position.set(-400,400,-600); scene.add(fill);
+
+  function lam(c,o){ var m=new THREE.MeshLambertMaterial({color:c}); if(o){ for(var k in o) m[k]=o[k]; } return m; }
+  var M={
+    plaster:lam(0xefe9df), plasterOut:lam(0xe2dbcf), floor:lam(0xd6cfc2), steel:lam(0x3f444a),
+    soil:lam(0x4a3626), planter:lam(0xf6f4ee), groove:lam(0xd2ccc0), ceil:lam(0xf3efe7,{transparent:true,opacity:0.35,depthWrite:false,side:THREE.DoubleSide})
+  };
+  // floor tile texture
+  (function(){
+    var c=document.createElement('canvas'); c.width=c.height=128; var x=c.getContext('2d');
+    x.fillStyle='#d9d2c4'; x.fillRect(0,0,128,128); x.strokeStyle='#bdb4a4'; x.lineWidth=2; x.strokeRect(1,1,126,126);
+    for(var i=0;i<60;i++){ x.fillStyle='rgba(120,110,95,'+(Math.random()*0.12)+')'; x.fillRect(Math.random()*128,Math.random()*128,2,2); }
+    var t=new THREE.CanvasTexture(c); t.wrapS=t.wrapT=THREE.RepeatWrapping; t.repeat.set(LEN/40,W/40); M.floor=new THREE.MeshLambertMaterial({map:t});
+  })();
+  // breeze-block texture with real holes (alphaTest)
+  function breezeTex(rx,ry){
+    var c=document.createElement('canvas'); c.width=c.height=128; var x=c.getContext('2d');
+    x.fillStyle='#e6dfd2'; x.fillRect(0,0,128,128);
+    x.globalCompositeOperation='destination-out';
+    function hole(cx,cy,r){ x.beginPath(); x.arc(cx,cy,r,0,Math.PI*2); x.fill(); }
+    hole(64,64,30); [[0,0],[128,0],[0,128],[128,128]].forEach(function(p){ hole(p[0],p[1],30); });
+    // small diamonds between
+    [[64,4],[64,124],[4,64],[124,64]].forEach(function(p){ x.beginPath(); x.moveTo(p[0],p[1]-7); x.lineTo(p[0]+7,p[1]); x.lineTo(p[0],p[1]+7); x.lineTo(p[0]-7,p[1]); x.closePath(); x.fill(); });
+    x.globalCompositeOperation='source-over'; x.strokeStyle='rgba(150,140,125,.55)'; x.lineWidth=3; x.strokeRect(1.5,1.5,125,125);
+    var t=new THREE.CanvasTexture(c); t.wrapS=t.wrapT=THREE.RepeatWrapping; t.repeat.set(rx,ry); return t;
+  }
+
+  var L={room:new THREE.Group(),west:new THREE.Group(),ceil:new THREE.Group(),hang:new THREE.Group(),planters:new THREE.Group(),dims:new THREE.Group(),tags:new THREE.Group(),woman:new THREE.Group(),cab:new THREE.Group(),ac:new THREE.Group()};
+  Object.keys(L).forEach(function(k){ scene.add(L[k]); });
+  function box(g,mat,x0,y0,z0,w,h,d){ var m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat); m.position.set(x0+w/2,y0+h/2,z0+d/2); g.add(m); return m; }
+
+  // floor slab
+  box(L.room,M.floor,0,-8,0,LEN,8,W);
+  // west wall (full, assumption)
+  box(L.west,M.plaster,0,0,-T,LEN,H,T);
+  // east wall
+  SEG.forEach(function(sg){
+    if(sg.t==='win'){
+      var tex=breezeTex(sg.w/20,SILL/20);
+      var bm=new THREE.MeshLambertMaterial({map:tex,alphaTest:0.5,side:THREE.DoubleSide});
+      [W, W+T].forEach(function(z){ var p=new THREE.Mesh(new THREE.PlaneGeometry(sg.w,SILL),bm); p.position.set(sg.x0+sg.w/2,SILL/2,z); L.room.add(p); });
+      // inner web of the blocks (horizontal grout layers) to read as thickness
+      for(var r=0;r<=Math.floor(SILL/20);r++){ box(L.room,M.plasterOut,sg.x0,Math.min(r*20,SILL-2),W,sg.w,1.2,T); }
+      box(L.room,M.plaster,sg.x0,SILL-3,W-1,sg.w,3,T+2); // sill cap
+    } else {
+      box(L.room,sg.t==='pillar'?M.plasterOut:M.plaster,sg.x0,0,W,sg.w,H,T);
+    }
+  });
+  // ceiling
+  box(L.ceil,M.ceil,0,H,-T,LEN,12,W+2*T);
+  var edges=new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(LEN,0.1,W+2*T)),new THREE.LineBasicMaterial({color:0x8a948e}));
+  edges.position.set(LEN/2,H,W/2); L.room.add(edges);
+  L.ceil.visible=false;
+
+  // ---------- plant parts ----------
+  var geoCache={};
+  function leafGeo(len,wid){
+    var k=len+'_'+wid; if(geoCache[k]) return geoCache[k];
+    var s=new THREE.Shape(); s.moveTo(0,0); s.quadraticCurveTo(wid*0.75,len*0.4,0,len); s.quadraticCurveTo(-wid*0.75,len*0.4,0,0);
+    return geoCache[k]=new THREE.ShapeGeometry(s,5);
+  }
+  var matCache={};
+  function lm(c){ return matCache[c]||(matCache[c]=new THREE.MeshLambertMaterial({color:c,side:THREE.DoubleSide})); }
+  function leaf(len,wid,c){ return new THREE.Mesh(leafGeo(len,wid),lm(c)); }
+  function R(a,b){ return a+Math.random()*(b-a); }
+  function tilted(obj,tilt,az,x,y,z){ var p=new THREE.Group(); p.rotation.y=az; obj.rotation.x=tilt; p.add(obj); p.position.set(x||0,y||0,z||0); return p; }
+  function cyl(r,h,c){ var m=new THREE.Mesh(new THREE.CylinderGeometry(r,r,h,6),lm(c)); m.position.y=h/2; var g=new THREE.Group(); g.add(m); return g; }
+  var UP=new THREE.Vector3(0,1,0);
+  function along(obj,pos,dir){ obj.quaternion.setFromUnitVectors(UP,dir.clone().normalize()); obj.position.copy(pos); return obj; }
+
+  var FLOORGEN={
+    chamae:function(){ var g=new THREE.Group();
+      for(var i=0;i<8;i++){ var h=R(45,80), a=R(0,6.28), r=R(0,6);
+        var st=new THREE.Group(); st.position.set(Math.cos(a)*r,0,Math.sin(a)*r); st.rotation.y=R(0,6.28);
+        var cane=cyl(0.5,h,0x5d7a3a); cane.rotation.x=R(0.02,0.15); st.add(cane);
+        var fr=new THREE.Group(); var Lr=R(30,42);
+        var rach=cyl(0.3,Lr,0x6c8b45); fr.add(rach);
+        for(var t=0.12;t<1;t+=0.075){ [1,-1].forEach(function(sd){ var lf=leaf(13*(1-0.45*t),2.2,0x3f7a35); lf.position.y=Lr*t; lf.rotation.z=sd*1.05; lf.rotation.y=sd*0.25; fr.add(lf); }); }
+        fr.rotation.x=R(0.5,1.1); fr.position.y=h*0.95; cane.add(fr);
+        g.add(st); }
+      return g; },
+    spath:function(){ var g=new THREE.Group();
+      for(var i=0;i<12;i++){ var p=new THREE.Group(); var pet=cyl(0.35,R(10,16),0x2f5a2a); p.add(pet); var lf=leaf(R(24,30),R(9,11),0x264f24); lf.position.y=pet.children[0].geometry.parameters.height; p.add(lf); g.add(tilted(p,R(0.25,0.8),R(0,6.28),R(-3,3),0,R(-3,3))); }
+      for(var j=0;j<3;j++){ var f=new THREE.Group(); var hh=R(42,52); f.add(cyl(0.3,hh,0x3a6b30)); var sp=leaf(11,7,0xfaf8f0); sp.position.y=hh-2; sp.rotation.x=-0.35; f.add(sp);
+        var sx=new THREE.Mesh(new THREE.CylinderGeometry(0.6,0.6,4,6),lm(0xe9dfa8)); sx.position.set(0,hh+2,0.8); f.add(sx); g.add(tilted(f,R(0.05,0.2),R(0,6.28),R(-2,2),0,R(-2,2))); }
+      return g; },
+    zamia:function(){ var g=new THREE.Group();
+      for(var i=0;i<8;i++){ var s=new THREE.Group(); var h=R(50,68); s.add(cyl(0.7,h,0x4b6b2f));
+        for(var t=0.3;t<1.02;t+=0.12){ [1,-1].forEach(function(sd){ var lf=leaf(8,4,0x234f22); lf.position.y=h*t; lf.rotation.z=sd*1.0; lf.rotation.x=0.3; s.add(lf); }); }
+        g.add(tilted(s,R(0.05,0.4),R(0,6.28),R(-4,4),0,R(-4,4))); }
+      return g; },
+    fern:function(){ var g=new THREE.Group();
+      for(var i=0;i<26;i++){ var f=new THREE.Group(); var a=leaf(R(20,26),8,0x6aa33a); f.add(a); var b2=leaf(R(16,22),7,0x7bb347); var piv=new THREE.Group(); piv.position.y=a.geometry.parameters?20:20; piv.rotation.x=R(0.5,0.9); piv.add(b2); f.add(piv); g.add(tilted(f,R(0.3,1.0),R(0,6.28),R(-3,3),0,R(-3,3))); }
+      return g; },
+    pseud:function(){ var g=new THREE.Group(); var cols=[0x7f9670,0xe5ddcf,0xc9a1b2,0x93a383];
+      for(var s=0;s<3;s++){ var c=cyl(0.6,R(50,70),0x6b5a45); c.rotation.x=R(-0.15,0.15); c.position.x=R(-4,4); g.add(c); }
+      for(var i=0;i<46;i++){ var h=R(18,72), r=R(4,17)*(1-Math.abs(h-45)/80), a=R(0,6.28); var lf=leaf(R(9,13),R(5,6.5),cols[i%4]); g.add(tilted(lf,R(0.6,1.3),a,Math.cos(a)*r,h,Math.sin(a)*r)); }
+      return g; },
+    trach:function(){ return climber(5,2.4,0x2d5a27,0xfdfdf8,0.75,9); },
+    stephan:function(){ return climber(8,4,0x2f5f2a,0xf7f5ee,1.0,6); },
+    taberna:function(){ var g=new THREE.Group();
+      for(var s2=0;s2<4;s2++){ var c=cyl(0.7,R(40,60),0x5b4a3a); c.rotation.x=R(-0.25,0.25); c.rotation.z=R(-0.25,0.25); g.add(c); }
+      for(var i=0;i<60;i++){ var h=R(20,68), r=R(3,16)*(1-Math.abs(h-44)/70), a=R(0,6.28); g.add(tilted(leaf(R(10,14),R(4,5),i%5?0x2f5f2a:0x3d7334),R(0.7,1.4),a,Math.cos(a)*r,h,Math.sin(a)*r)); }
+      for(var j=0;j<14;j++){ var h2=R(40,72), a2=R(0,6.28), r2=R(5,14); var fl=new THREE.Group(); for(var q=0;q<5;q++){ var pt=leaf(2.6,2.4,0xfbfbf6); pt.rotation.z=q*1.256; fl.add(pt); } fl.position.set(Math.cos(a2)*r2,h2,Math.sin(a2)*r2); fl.rotation.x=-R(0.6,1.2); g.add(fl); }
+      return g; },
+    dieff:function(){ var g=new THREE.Group(); var h=R(28,36); g.add(cyl(1.4,h,0x7d8a5a));
+      for(var i=0;i<12;i++){ var p=new THREE.Group(); var pet=cyl(0.5,R(8,12),0x8fa36a); p.add(pet); var lf=leaf(R(26,32),R(11,13),i%2?0xd6e3bf:0x6f9a50); lf.position.y=pet.children[0].geometry.parameters.height; p.add(lf); var ins=leaf(R(16,20),R(5,6),i%2?0x6f9a50:0xe3ecd0); ins.position.set(0,lf.position.y+3,0.15); p.add(ins);
+        g.add(tilted(p,R(0.5,1.2),R(0,6.28),0,h-R(0,12),0)); }
+      return g; },
+    cordy:function(){ var g=new THREE.Group(); var h=R(26,34); g.add(cyl(1.2,h,0x6b5545));
+      for(var i=0;i<18;i++){ g.add(tilted(leaf(R(34,44),R(6,8),i%3?0x7a1f3d:0xb8476a),R(0.15,1.3),R(0,6.28),0,h-R(0,6),0)); }
+      return g; }
+  };
+
+  // climber: grows from the soil to the wall face behind the planter (local +z) and up the blocks, poking into the holes
+  function climber(ll,lw,lc,fc,fr,clusters){ var g=new THREE.Group(); var wz=(W-1.5)-(PL_Z0+PL_D/2); var vm=lm(0x6b7a45);
+    for(var i=0;i<6;i++){ var x=R(-9,9), top=R(80,112), pts=[new THREE.Vector3(x*0.4,0,R(-4,4)),new THREE.Vector3(x,8,wz-3),new THREE.Vector3(x,14,wz)];
+      for(var y=24;y<top;y+=10){ x+=R(-7,7); pts.push(new THREE.Vector3(x,y,wz+(Math.random()<0.35?2.5:R(-1.5,0)))); }
+      var cur=new THREE.CatmullRomCurve3(pts); g.add(new THREE.Mesh(new THREE.TubeGeometry(cur,30,0.3,4,false),vm));
+      for(var t=0.08;t<1;t+=0.05){ var p=cur.getPoint(t); [1,-1].forEach(function(sd){ var lf=leaf(ll,lw,lc); var gr=tilted(lf,0,sd*1.4+R(-0.4,0.4),p.x,p.y,p.z-0.6); lf.rotation.x=R(-0.6,0.6)+Math.PI*0.5*sd*0.6; g.add(gr); }); }
+      for(var c=0;c<clusters/6+1;c++){ var e=cur.getPoint(R(0.3,0.98)); var cl=new THREE.Group(); for(var k=0;k<7;k++){ var s=new THREE.Mesh(new THREE.SphereGeometry(fr,6,4),lm(fc)); s.position.set(R(-2.2,2.2),R(-2,2),R(-2.5,0)); cl.add(s); } cl.position.set(e.x,e.y,e.z-1); g.add(cl); }
+    }
+    return g; }
+  // hanging plants (origin at pot soil centre)
+  function zygo(){ var g=new THREE.Group(); var seg=new THREE.BoxGeometry(3.4,4.6,0.5);
+    for(var i=0;i<16;i++){ var phi=R(0,6.28), th=R(0.2,0.9), pos=new THREE.Vector3(Math.cos(phi)*R(2,9),0,Math.sin(phi)*R(2,9));
+      var n=Math.round(R(4,7));
+      for(var k=0;k<n;k++){ var dir=new THREE.Vector3(Math.cos(phi)*Math.sin(th),Math.cos(th),Math.sin(phi)*Math.sin(th));
+        var m=new THREE.Mesh(seg,lm(0x4f7a3a)); along(m,pos.clone().add(dir.clone().multiplyScalar(2.3)),dir); m.rotateY(R(-0.6,0.6)); g.add(m);
+        pos.add(dir.multiplyScalar(4.3)); th+=R(0.28,0.42); }
+      if(Math.random()<0.7){ var d2=new THREE.Vector3(Math.cos(phi)*Math.sin(th),Math.cos(th),Math.sin(phi)*Math.sin(th));
+        var fl=new THREE.Mesh(new THREE.ConeGeometry(1.8,6.5,7),lm(0xe0306f)); along(fl,pos.clone().add(d2.clone().multiplyScalar(3)),d2.clone().negate()); g.add(fl);
+        var c2=new THREE.Mesh(new THREE.ConeGeometry(1.1,4,6),lm(0xff8fb5)); along(c2,pos.clone().add(d2.clone().multiplyScalar(5.5)),d2.clone().negate()); g.add(c2); }
+    }
+    return g; }
+  function hoya(){ var g=new THREE.Group(); var vm=lm(0x7d8a55);
+    for(var i=0;i<7;i++){ var phi=R(0,6.28), len=R(35,75), pts=[];
+      var r0=R(6,10); pts.push(new THREE.Vector3(Math.cos(phi)*r0,1,Math.sin(phi)*r0));
+      pts.push(new THREE.Vector3(Math.cos(phi)*(POT_R+3),-2,Math.sin(phi)*(POT_R+3)));
+      for(var y=8;y<len;y+=10){ pts.push(new THREE.Vector3(Math.cos(phi)*(POT_R+3+R(-2,3)),-y,Math.sin(phi)*(POT_R+3+R(-2,3)))); }
+      var cur=new THREE.CatmullRomCurve3(pts); g.add(new THREE.Mesh(new THREE.TubeGeometry(cur,24,0.35,4,false),vm));
+      for(var t=0.12;t<1;t+=0.09){ var p=cur.getPoint(t); [1,-1].forEach(function(sd){ var lf=leaf(6.5,3.6,0x355f2f); var gr=tilted(lf,0,phi+sd*1.2,p.x,p.y,p.z); lf.rotation.x=-1.8+R(-0.3,0.3); g.add(gr); }); }
+      if(i<3){ var e=cur.getPoint(R(0.35,0.75)); var um=new THREE.Group(); for(var k=0;k<16;k++){ var s=new THREE.Mesh(new THREE.SphereGeometry(0.75,6,4),lm(k%4?0xf4d2db:0xb0304a)); var a=R(0,6.28), b=R(0,1.4); s.position.set(Math.cos(a)*Math.sin(b)*3,-Math.cos(b)*3,Math.sin(a)*Math.sin(b)*3); um.add(s); } um.position.set(e.x*1.1,e.y,e.z*1.1); g.add(um); }
+    }
+    return g; }
+
+  // rattan basket texture
+  function weaveTex(hex){
+    var c=document.createElement('canvas'); c.width=c.height=64; var x=c.getContext('2d');
+    x.fillStyle=hex; x.fillRect(0,0,64,64);
+    for(var r=0;r<8;r++){ for(var k=0;k<8;k++){ x.fillStyle=((r+k)%2)?'rgba(255,255,255,.18)':'rgba(0,0,0,.14)'; x.fillRect(k*8,r*8,8,4); x.fillStyle=((r+k)%2)?'rgba(0,0,0,.1)':'rgba(255,255,255,.12)'; x.fillRect(k*8,r*8+4,8,4); } }
+    var t=new THREE.CanvasTexture(c); t.wrapS=t.wrapT=THREE.RepeatWrapping; t.repeat.set(6,3); return t;
+  }
+  var basketGeo=new THREE.LatheGeometry([new THREE.Vector2(0.01,0),new THREE.Vector2(6.5,1.2),new THREE.Vector2(10,5.5),new THREE.Vector2(11.9,11),new THREE.Vector2(12.5,16),new THREE.Vector2(12.5,20)],28);
+  var hangHit=[];
+  HANG.forEach(function(h,idx){
+    var g=new THREE.Group(); g.position.set(h.x,POT_BOTTOM,POT_Z);
+    var col='#'+h.c.toString(16).padStart(6,'0');
+    var bk=new THREE.Mesh(basketGeo,new THREE.MeshLambertMaterial({map:weaveTex(col),side:THREE.DoubleSide})); g.add(bk);
+    var rim=new THREE.Mesh(new THREE.TorusGeometry(12.5,0.7,6,28),lm(h.c)); rim.rotation.x=Math.PI/2; rim.position.y=POT_H; g.add(rim);
+    var soil=new THREE.Mesh(new THREE.CircleGeometry(11.6,24),lm(0x4a3626)); soil.rotation.x=-Math.PI/2; soil.position.y=POT_H-1.5; g.add(soil);
+    var pl=h.p==='zygo'?zygo():hoya(); pl.position.y=POT_H-1.5; g.add(pl);
+    // chains to ring, ring to hook arm
+    var ring=new THREE.Vector3(0,HOOK_Y-POT_BOTTOM-8,0);
+    var cm=new THREE.LineBasicMaterial({color:0x444444});
+    [0,2.09,4.19].forEach(function(a){ var gg=new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(Math.cos(a)*12.5,POT_H,Math.sin(a)*12.5),ring]); g.add(new THREE.Line(gg,cm)); });
+    var gg2=new THREE.BufferGeometry().setFromPoints([ring,new THREE.Vector3(0,HOOK_Y-POT_BOTTOM,0)]); g.add(new THREE.Line(gg2,cm));
+    L.hang.add(g);
+    // wall bracket: plate + arm
+    box(L.hang,M.steel,h.x-2,HOOK_Y-6,W-1,4,12,1);
+    box(L.hang,M.steel,h.x-0.8,HOOK_Y-0.8,POT_Z-0.8,1.6,1.6,W-1-POT_Z+0.8);
+    bk.userData.hang=idx; hangHit.push(bk);
+  });
+
+  // planters
+  var planterObjs=[], planterHit=[];
+  var hlMat=new THREE.MeshLambertMaterial({color:0xe7f3e3});
+  function buildPlanters(){
+  while(L.planters.children.length) L.planters.remove(L.planters.children[0]);
+  planterObjs.length=0; planterHit.length=0;
+  PLANTERS.forEach(function(x0,i){
+    var g=new THREE.Group(); g.position.set(x0,0,PL_Z0);
+    var body=new THREE.Mesh(new THREE.BoxGeometry(PL_L,PL_H,PL_D),M.planter); body.position.set(PL_L/2,PL_H/2,PL_D/2); g.add(body);
+    [8,13,18].forEach(function(y){ var gr=new THREE.Mesh(new THREE.BoxGeometry(PL_L+0.3,0.5,PL_D+0.3),M.groove); gr.position.set(PL_L/2,y,PL_D/2); g.add(gr); });
+    var so=new THREE.Mesh(new THREE.BoxGeometry(PL_L-3,0.6,PL_D-3),M.soil); so.position.set(PL_L/2,PL_H-1.6,PL_D/2); g.add(so);
+    var plants=new THREE.Group(); g.add(plants);
+    body.userData.planter=i; planterHit.push(body);
+    L.planters.add(g); planterObjs.push({g:g,plants:plants,body:body});
+    fillPlanter(i);
+  });
+  }
+  function fillPlanter(i){
+    var o=planterObjs[i]; while(o.plants.children.length) o.plants.remove(o.plants.children[0]);
+    choice[i].forEach(function(k,slot){ var px=PL_L/2; var p=FLOORGEN[k](); p.position.set(px,PL_H-1.4,PL_D/2); o.plants.add(p); });
+  }
+  onChoice=function(i){ fillPlanter(i); if(window.__tags) window.__tags(); };
+  buildPlanters();
+
+  // ---------- woman, 170 cm, for scale ----------
+  (function(){
+    var g=new THREE.Group(), skin=lm(0xd9b096), top=lm(0x3f6f8f), pants=lm(0x2e3338), hair=lm(0x3b2a20), shoe=lm(0x1f1f1f);
+    function limb(r1,r2,a,b,mat){ var d=new THREE.Vector3().subVectors(b,a), len=d.length(); var m=new THREE.Mesh(new THREE.CylinderGeometry(r2,r1,len,12),mat); along(m,a.clone().add(d.clone().multiplyScalar(0.5)),d); g.add(m); return m; }
+    function ball(r,x,y,z,mat,sx,sy,sz){ var m=new THREE.Mesh(new THREE.SphereGeometry(r,16,12),mat); m.position.set(x,y,z); m.scale.set(sx||1,sy||1,sz||1); g.add(m); return m; }
+    var V3=function(x,y,z){ return new THREE.Vector3(x,y,z); };
+    [-1,1].forEach(function(sd){
+      limb(6.2,4.6,V3(sd*7,88,0),V3(sd*6,46,0),pants);   // thigh
+      limb(4.6,3.6,V3(sd*6,46,0),V3(sd*5.5,7,0),pants);  // shin
+      ball(1,sd*5.5,4,3,shoe,4,3.5,9);                   // shoe
+      limb(3.4,3.0,V3(sd*17,138,0),V3(sd*19,110,1),top); // upper arm
+      limb(3.0,2.4,V3(sd*19,110,1),V3(sd*19,84,4),skin); // forearm
+      ball(3,sd*19,81,4.5,skin,1,1.3,1);                 // hand
+    });
+    var body=new THREE.Mesh(new THREE.LatheGeometry([V3(0.1,82,0),V3(15,84,0),V3(16.5,92,0),V3(13,104,0),V3(12,112,0),V3(15,126,0),V3(17,136,0),V3(14,142,0),V3(5,145,0)].map(function(v){return new THREE.Vector2(v.x,v.y);}),24),top);
+    body.scale.set(1,1,0.62); g.add(body);
+    var hip=new THREE.Mesh(new THREE.CylinderGeometry(15,15.5,10,24),pants); hip.position.y=86; hip.scale.set(1,1,0.62); g.add(hip);
+    limb(4.6,4.2,V3(0,143,0),V3(0,152,0.5),skin);       // neck
+    ball(9.6,0,159.8,1,skin,0.92,1.08,1);               // head (top at 170)
+    ball(10.2,0,161.5,-1.6,hair,0.96,1.04,1);           // hair
+    ball(5,0,156,-9.5,hair,1,1.2,1);                    // bun
+    g.position.set(WOMAN.x,0,WOMAN.z); L.woman.add(g);
+  })();
+  // ---------- cabinet on the west wall ----------
+  var cabHit=[];
+  (function(){
+    var wood=lam(0xd9c2a0), inner=lam(0xc9b08c), door=lam(0xe6d3b8), top=lam(0xc4a57c), base=lam(0x8a7458), metal=lam(0x5b5f63);
+    var x0=CAB.x0, l=CAB.l, d=CAB.d, h=CAB.h, p=1.8, fd=d-1.2; // fd: carcass depth behind the doors
+    box(L.cab,base,x0+2,0,0,l-4,8,d-3);                 // plinth
+    cabHit.push(box(L.cab,inner,x0,8,0,l,h-11,p));      // back
+    cabHit.push(box(L.cab,wood,x0,8,0,p,h-11,fd));      // side (north)
+    cabHit.push(box(L.cab,wood,x0+l-p,8,0,p,h-11,fd));  // side (south)
+    box(L.cab,wood,x0,8,0,l,p,fd);                       // bottom
+    cabHit.push(box(L.cab,top,x0-1,h-3,0,l+2,3,d+1));   // top
+    [Math.round(h*0.3),Math.round(h*0.53),Math.round(h*0.76)].forEach(function(y){ box(L.cab,wood,x0+p,y,p,l-2*p,p,fd-p-1); }); // shelves
+    // two doors hinged on the outer edges, swing out into the balcony
+    var doors=[];
+    [0,1].forEach(function(k){
+      var hinge=new THREE.Group(); hinge.position.set(k?x0+l:x0,0,d); L.cab.add(hinge);
+      var dw=l/2-0.6, sgn=k?-1:1;
+      var dm=new THREE.Mesh(new THREE.BoxGeometry(dw,h-14,1.2),door); dm.position.set(sgn*dw/2,9.5+(h-14)/2,-0.6); hinge.add(dm); cabHit.push(dm);
+      var hm=new THREE.Mesh(new THREE.BoxGeometry(1.6,16,1.6),metal); hm.position.set(sgn*(dw-4),Math.min(100,h*0.55),0.8); hinge.add(hm);
+      doors.push({g:hinge,dir:k?1:-1});
+    });
+    var cur=0, target=0;
+    window.__cabOpen=function(on){ target=on?1:0; };
+    window.__cabStep=function(){ if(Math.abs(target-cur)<0.002){ cur=target; } else cur+=(target-cur)*0.14; doors.forEach(function(o){ o.g.rotation.y=o.dir*cur*Math.PI*0.5; }); };
+    cabHit.forEach(function(m){ m.userData.cab=1; });
+  })();
+  // ---------- air-conditioner outdoor unit: on the floor, window-153 end, corner with the west wall ----------
+  (function(){
+    var a=ACU, body=lam(0xeceeee), grey=lam(0xb9bdbf), dark=lam(0x3a3f44);
+    // built in a local frame (width along local x, fan on local +z), then turned so local +z points south (+x)
+    var g=new THREE.Group(); g.rotation.y=-Math.PI/2; g.position.set(a.x0+a.d,0,a.z0); L.ac.add(g);
+    box(g,body,0,0,0,a.w,a.h,a.d);
+    var cx=a.w*0.6, cy=a.h/2, r=a.h*0.38;
+    var disc=new THREE.Mesh(new THREE.CircleGeometry(r,32),dark); disc.position.set(cx,cy,a.d+0.1); g.add(disc);
+    for(var i=1;i<=4;i++){ var ring=new THREE.Mesh(new THREE.TorusGeometry(r*i/4.2,0.35,4,32),grey); ring.position.set(cx,cy,a.d+0.4); g.add(ring); }
+    [0,1].forEach(function(k){ var bar=new THREE.Mesh(new THREE.BoxGeometry(k?0.8:2*r,k?2*r:0.8,0.6),grey); bar.position.set(cx,cy,a.d+0.5); g.add(bar); });
+    box(g,grey,a.w*0.04,6,a.d,a.w*0.18,a.h-12,0.5);   // service panel
+  })();
+  window.__cabStep=window.__cabStep||function(){};
+  window.__hl=function(i){ planterObjs.forEach(function(o,k){ o.body.material = (k===i)?hlMat:M.planter; }); };
+
+  // ---------- dimensions ----------
+  function label(text,x,y,z,h,par){
+    var c=document.createElement('canvas'), ctx=c.getContext('2d'), fs=44;
+    ctx.font='500 '+fs+'px Heebo, Arial, sans-serif'; var tw=ctx.measureText(text).width;
+    c.width=Math.ceil(tw+30); c.height=fs+20; ctx.font='500 '+fs+'px Heebo, Arial, sans-serif';
+    ctx.fillStyle='rgba(255,255,255,.9)'; var r=12, w=c.width, hh=c.height;
+    ctx.beginPath(); ctx.moveTo(r,0); ctx.lineTo(w-r,0); ctx.quadraticCurveTo(w,0,w,r); ctx.lineTo(w,hh-r); ctx.quadraticCurveTo(w,hh,w-r,hh); ctx.lineTo(r,hh); ctx.quadraticCurveTo(0,hh,0,hh-r); ctx.lineTo(0,r); ctx.quadraticCurveTo(0,0,r,0); ctx.fill();
+    ctx.fillStyle='#1f2a24'; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.direction=/[֐-׿]/.test(text)?'rtl':'ltr'; ctx.fillText(text,w/2,hh/2+2);
+    var t=new THREE.CanvasTexture(c); t.minFilter=THREE.LinearFilter;
+    var sp=new THREE.Sprite(new THREE.SpriteMaterial({map:t,depthTest:false,transparent:true})); var H2=h||9;
+    sp.scale.set(H2*c.width/c.height,H2,1); sp.position.set(x,y,z); sp.renderOrder=20; (par||L.dims).add(sp); return sp;
+  }
+  var dm=new THREE.LineBasicMaterial({color:0x2b3330,depthTest:false});
+  function line(a,b){ var l=new THREE.Line(new THREE.BufferGeometry().setFromPoints([a,b]),dm); l.renderOrder=19; L.dims.add(l); }
+  function dimX(x0,x1,y,z,text){ line(new THREE.Vector3(x0,y,z),new THREE.Vector3(x1,y,z)); [x0,x1].forEach(function(x){ line(new THREE.Vector3(x,y-4,z),new THREE.Vector3(x,y+4,z)); }); label(text,(x0+x1)/2,y+8,z,8); }
+  function dimY(x,y0,y1,z,text){ line(new THREE.Vector3(x,y0,z),new THREE.Vector3(x,y1,z)); [y0,y1].forEach(function(y){ line(new THREE.Vector3(x-4,y,z),new THREE.Vector3(x+4,y,z)); }); label(text,x-2,(y0+y1)/2,z,8); }
+  function dimZ(x,y,z0,z1,text){ line(new THREE.Vector3(x,y,z0),new THREE.Vector3(x,y,z1)); [z0,z1].forEach(function(z){ line(new THREE.Vector3(x-4,y,z),new THREE.Vector3(x+4,y,z)); }); label(text,x,y+7,(z0+z1)/2,8); }
+  function buildDims(){
+    SEG.forEach(function(sg){ dimX(sg.x0,sg.x1,H+14,W+T/2,sg.w+' '+NAMES[sg.t]); });
+    dimX(0,LEN,H+40,W+T/2,'890 סה״כ');
+    dimY(-14,0,SILL,W+T/2,'127 אדן');
+    dimY(-14,SILL,H,W+T/2,'147 פתח');
+    dimY(-40,0,H,W/2,'274 תקרה');
+    dimZ(-14,2,0,W,'145 רוחב');
+    dimZ(SEG[2].x0+SEG[2].w/2,H+4,W,W+T,'20');
+    dimY(HANG[0].x-POT_R-6,0,POT_BOTTOM,POT_Z,'220');
+    dimX(CAB.x0,CAB.x0+CAB.l,CAB.h+6,CAB.d/2,String(CAB.l));
+    dimZ(CAB.x0+CAB.l+6,CAB.h+2,0,CAB.d,String(CAB.d));
+    dimY(CAB.x0+CAB.l+6,0,CAB.h,2,String(CAB.h));
+    // AC unit: 80 along the north wall (z), 30 deep (x), 55 high
+    dimZ(ACU.x0-6,ACU.h+4,ACU.z0,ACU.z0+ACU.w,'מזגן '+ACU.w); dimX(ACU.x0,ACU.x0+ACU.d,ACU.h+4,ACU.z0-2,String(ACU.d)); dimY(ACU.x0-6,0,ACU.h,ACU.z0-2,String(ACU.h));
+    // size of every planter (length × width × depth) and every hanging pot (diameter × depth)
+    PLANTERS.forEach(function(x0){ label(PL_L+' × '+PL_D+' × '+PL_H,x0+PL_L/2,PL_H/2,PL_Z0-3,6); });
+    HANG.forEach(function(h){ label('Ø'+(POT_R*2)+' × '+POT_H,h.x,POT_BOTTOM-8,POT_Z-POT_R-3,6); });
+  }
+  var tm=new THREE.LineBasicMaterial({color:0x2f6b3a,depthTest:false}), cm=new THREE.MeshBasicMaterial({color:0x2f6b3a,depthTest:false});
+  function arrow(a,b){ var l=new THREE.Line(new THREE.BufferGeometry().setFromPoints([a,b]),tm); l.renderOrder=19; L.tags.add(l);
+    var c=new THREE.Mesh(new THREE.ConeGeometry(1.6,5,10),cm); c.renderOrder=19; c.position.copy(b);
+    var d=new THREE.Vector3().subVectors(b,a).normalize(); c.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),d); c.position.addScaledVector(d,-2.5); L.tags.add(c); }
+  function buildTags(){ while(L.tags.children.length) L.tags.remove(L.tags.children[0]); if(NONAMES) return;
+    var zf=PL_Z0-22;
+    PLANTERS.forEach(function(x0,i){ var cx=x0+PL_L/2, y=(i%2)?150:172;
+      label((i+1)+'. '+combo(choice[i]),cx,y,zf,8,L.tags);
+      arrow(new THREE.Vector3(cx,y-6,zf),new THREE.Vector3(cx,PL_H+30,PL_Z0+PL_D/2)); });
+    HANG.forEach(function(h,j){ var y=(j%2)?196:206, z=POT_Z-34;
+      label(h.p==='zygo'?'זיגוקקטוס':'בת שבע',h.x,y,z,7,L.tags);
+      arrow(new THREE.Vector3(h.x,y+4,z),new THREE.Vector3(h.x,POT_BOTTOM+POT_H/2,POT_Z-POT_R)); });
+  }
+  function rebuildDims(){ while(L.dims.children.length) L.dims.remove(L.dims.children[0]); buildDims(); buildTags(); }
+  if(document.fonts && document.fonts.ready){ document.fonts.ready.then(rebuildDims); } else rebuildDims();
+  onVariant=function(){ buildPlanters(); rebuildDims(); }; window.__tags=buildTags;
+
+  // ---------- views ----------
+  var VIEWS={
+    overview:{p:[-200,560,-380],t:[430,90,80],west:false},
+    eye:{p:[6,160,35],t:[420,150,95],west:false},
+    east:{p:[445,150,-620],t:[445,140,145],west:false},
+    top:{p:[445,1350,72.6],t:[445,0,72.5],west:false},
+    cab:{p:[629,272,100],t:[629,80,12],west:false}
+  };
+  var anim=null;
+  function goView(k,instant){
+    var v=VIEWS[k]; var p0=camera.position.clone(), t0=controls.target.clone(), p1=new THREE.Vector3().fromArray(v.p), t1=new THREE.Vector3().fromArray(v.t);
+    setWest(v.west);
+    document.querySelectorAll('[data-view]').forEach(function(b){ b.setAttribute('aria-pressed', b.dataset.view===k?'true':'false'); });
+    if(instant){ camera.position.copy(p1); controls.target.copy(t1); controls.update(); return; }
+    var st=performance.now(); anim=function(now){ var u=Math.min(1,(now-st)/650); u=u<.5?2*u*u:1-Math.pow(-2*u+2,2)/2; camera.position.lerpVectors(p0,p1,u); controls.target.lerpVectors(t0,t1,u); if(u>=1) anim=null; };
+  }
+  function setWest(on){ L.west.visible=on; var b=document.querySelector('[data-tog=west]'); if(b) b.setAttribute('aria-pressed',on?'true':'false'); }
+  document.querySelectorAll('[data-view]').forEach(function(b){ b.addEventListener('click',function(){ goView(b.dataset.view); }); });
+  document.querySelectorAll('[data-tog]').forEach(function(b){ b.addEventListener('click',function(){
+    var on=b.getAttribute('aria-pressed')!=='true'; b.setAttribute('aria-pressed',on?'true':'false');
+    if(b.dataset.tog==='dims') L.dims.visible=on; if(b.dataset.tog==='ceil') L.ceil.visible=on; if(b.dataset.tog==='west') L.west.visible=on; if(b.dataset.tog==='tags') L.tags.visible=on; if(b.dataset.tog==='woman') L.woman.visible=on; if(b.dataset.tog==='cab') L.cab.visible=on; if(b.dataset.tog==='cabopen' && window.__cabOpen){ window.__cabOpen(on); if(on){ L.cab.visible=true; var cv=document.querySelector('[data-tog=cab]'); if(cv) cv.setAttribute('aria-pressed','true'); goView('cab'); } }
+  }); });
+  goView('overview',true);
+
+  // ---------- picking ----------
+  var ray=new THREE.Raycaster(), ptr=new THREE.Vector2(), down=null;
+  renderer.domElement.addEventListener('pointerdown',function(e){ down=[e.clientX,e.clientY]; });
+  renderer.domElement.addEventListener('pointerup',function(e){
+    if(!down || Math.hypot(e.clientX-down[0],e.clientY-down[1])>6) return;
+    var r=renderer.domElement.getBoundingClientRect(); ptr.set(((e.clientX-r.left)/r.width)*2-1, -((e.clientY-r.top)/r.height)*2+1);
+    ray.setFromCamera(ptr,camera);
+    var hit=ray.intersectObjects(planterHit.concat(hangHit,L.cab.visible?cabHit:[]),false)[0];
+    if(!hit){ closeSheet(); return; }
+    if(hit.object.userData.cab){ var cb=document.querySelector('[data-tog=cabopen]'); if(cb) cb.click(); return; }
+    if(hit.object.userData.planter!=null) openPlanter(hit.object.userData.planter); else openHang(HANG[hit.object.userData.hang]);
+  });
+
+  function resize(){ var w=stage.clientWidth, h=stage.clientHeight; renderer.setSize(w,h,false); camera.aspect=w/h; camera.fov = w<h ? 60 : 45; camera.updateProjectionMatrix(); }
+  window.addEventListener('resize',resize); resize();
+  (function loop(now){ requestAnimationFrame(loop); if(anim) anim(now); window.__cabStep(); controls.update(); renderer.render(scene,camera); })(performance.now());
+})();
+</script>
+</body>
+</html>
