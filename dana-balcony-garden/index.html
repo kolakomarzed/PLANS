@@ -83,7 +83,7 @@ body.sheetOpen .dock{display:none}
 </style>
 </head>
 <body>
-<div id="stage" aria-label="מודל תלת־ממד של המרפסת. גוררים כדי לסובב, נוגעים באדנית כדי לבחור צמח"></div>
+<div id="stage" aria-label="מודל תלת־ממד של המרפסת. גוררים כדי לסובב"></div>
 
 <div class="head">
   <div class="title">
@@ -106,7 +106,7 @@ body.sheetOpen .dock{display:none}
     <button type="button" data-tog="ceil" aria-pressed="false">תקרה</button>
     <button type="button" data-tog="west" aria-pressed="false">קיר מערבי</button>
   </div>
-  <div class="hint" id="hint">גוררים כדי לסובב · שתי אצבעות להתקרב · נגיעה באדנית כדי לבחור צמח</div>
+  <div class="hint" id="hint">גוררים כדי לסובב · שתי אצבעות להתקרב</div>
 </div>
 
 <div id="sheet" hidden role="dialog" aria-label="בחירת צמח לאדנית">
@@ -161,6 +161,7 @@ var FLOOR={
 var SHORT={chamae:'חמדוריאה',spath:'ספאתיפילום',zamia:'זמיה',fern:'שרך',pseud:'פסאודרנתמום',cordy:'קורדילין',trach:'יסמין',stephan:'סטפנוטיס',taberna:'טברנה',dieff:'דיפנבכיה'};
 var store={v:1,c:{}};
 var NONAMES=true;
+var EDITOR=false; // full (costs) version; the client build sets this to false
 try{ var sv=JSON.parse(localStorage.getItem('danaBalconyV2')||'null'); if(sv && typeof sv.v==='number' && sv.c) store=sv; else { var o1=JSON.parse(localStorage.getItem('danaBalconyV1')||'null'); if(o1 && o1.c && o1.c[1]) store={v:0,c:{0:o1.c[1]}}; } }catch(e){}
 
 function variantChoice(i){ var c=store.c[i], d=VARIANTS[i].p; var ok=c && c.length===d.length && c.every(function(x){ return norm(x).every(function(k){return FLOOR[k];}); }); return (ok?c:d).map(norm); }
@@ -583,7 +584,9 @@ function openHang(h){
     if(!down || Math.hypot(e.clientX-down[0],e.clientY-down[1])>6) return;
     var r=renderer.domElement.getBoundingClientRect(); ptr.set(((e.clientX-r.left)/r.width)*2-1, -((e.clientY-r.top)/r.height)*2+1);
     ray.setFromCamera(ptr,camera);
-    var hit=ray.intersectObjects(planterHit.concat(hangHit,L.cab.visible?cabHit:[]),false)[0];
+    // the client page (EDITOR=false) is an illustration only: tapping a planter or pot does nothing
+    var targets=(EDITOR?planterHit.concat(hangHit):[]).concat(L.cab.visible?cabHit:[]);
+    var hit=ray.intersectObjects(targets,false)[0];
     if(!hit){ closeSheet(); return; }
     if(hit.object.userData.cab){ var cb=document.querySelector('[data-tog=cabopen]'); if(cb) cb.click(); return; }
     if(hit.object.userData.planter!=null) openPlanter(hit.object.userData.planter); else openHang(HANG[hit.object.userData.hang]);
