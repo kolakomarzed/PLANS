@@ -79,6 +79,8 @@ body.paneOpen .title{visibility:hidden}
 #sheet .opts{display:flex;flex-wrap:wrap;gap:6px}
 #sheet .close{position:absolute;left:10px;top:8px;min-height:30px;padding:3px 10px}
 body.sheetOpen .dock{display:none}
+#sheet .hidebtn{background:var(--warnbg);color:var(--warn);border-color:var(--warn);font-weight:500}
+#hiddenBtn{background:var(--warnbg);color:var(--warn);border-color:var(--warn)}
 @media (max-width:560px){ .title p{display:none} .title h1{font-size:.95rem} button{padding:6px 10px;font-size:.8rem;min-height:34px} }
 </style>
 </head>
@@ -95,16 +97,9 @@ body.sheetOpen .dock{display:none}
 <div class="dock">
   <div class="chips" id="varchips" style="display:none"><label for="varSel" class="vlab">הצעה</label><select id="varSel"></select></div>
   <div class="chips" id="camchips">
-    <button type="button" data-view="overview" aria-pressed="true">כללי</button>
-    <button type="button" data-view="eye" aria-pressed="false">מהמרפסת</button>
-    <button type="button" data-view="east" aria-pressed="false">קיר מזרחי</button>
-    <button type="button" data-view="top" aria-pressed="false">מלמעלה</button>
-    <span class="sep"></span>
     <button type="button" data-tog="dims" aria-pressed="true">מידות</button>
     <button type="button" data-tog="cab" aria-pressed="true">ארונית</button>
     <button type="button" data-tog="cabopen" aria-pressed="false">ארונית פתוחה</button>
-    <button type="button" data-tog="ceil" aria-pressed="false">תקרה</button>
-    <button type="button" data-tog="west" aria-pressed="false">קיר מערבי</button>
   </div>
   <div class="hint" id="hint">גוררים כדי לסובב · שתי אצבעות להתקרב</div>
 </div>
@@ -162,11 +157,11 @@ var SHORT={chamae:'חמדוריאה',spath:'ספאתיפילום',zamia:'זמי�
 var store={v:1,c:{}};
 var NONAMES=true;
 var EDITOR=false; // full (costs) version; the client build sets this to false
-try{ var sv=JSON.parse(localStorage.getItem('danaBalconyV2')||'null'); if(sv && typeof sv.v==='number' && sv.c) store=sv; else { var o1=JSON.parse(localStorage.getItem('danaBalconyV1')||'null'); if(o1 && o1.c && o1.c[1]) store={v:0,c:{0:o1.c[1]}}; } }catch(e){}
+try{ var sv=JSON.parse(null||'null'); if(sv && typeof sv.v==='number' && sv.c) store=sv; }catch(e){}
 
 function variantChoice(i){ var c=store.c[i], d=VARIANTS[i].p; var ok=c && c.length===d.length && c.every(function(x){ return norm(x).every(function(k){return FLOOR[k];}); }); return (ok?c:d).map(norm); }
 var V=Math.max(0,Math.min(store.v,VARIANTS.length-1)); PLANTERS=VARIANTS[V].x; PL_L=LEN_OF(V); PL_H=VARIANTS[V].H||25; var choice=variantChoice(V);
-function saveChoice(){ store.v=V; store.c[V]=choice.map(function(c){return c.slice();}); try{ localStorage.setItem('danaBalconyV2',JSON.stringify(store)); }catch(e){} }
+function saveChoice(){ store.v=V; store.c[V]=choice.map(function(c){return c.slice();}); try{  }catch(e){} }
 var onVariant=null;
 function setVariant(i){ V=i; PLANTERS=VARIANTS[i].x; PL_L=LEN_OF(i); PL_H=VARIANTS[i].H||25; choice=variantChoice(i); saveChoice(); closeSheet(); renderBOM(); drawSVG(); var sel=document.getElementById('varSel'); if(sel) sel.value=String(i); if(onVariant) onVariant(); }
 
@@ -208,6 +203,7 @@ function openPlanter(i){
       box.appendChild(b);
     });
   });
+  addHideBtn('p'+i);
   sheet.hidden=false; document.body.classList.add('sheetOpen'); if(window.__hl) window.__hl(i);
 }
 function openHang(h){
@@ -215,8 +211,43 @@ function openHang(h){
   document.getElementById('sheetTitle').textContent=(z?'זיגוקקטוס':'בת שבע (הויה)')+' · עציץ תלוי';
   document.getElementById('sheetText').textContent=(z?'קערה 15. 9/10 למרפסת. ':'כ־6/10 (הערכה): תגדל, הפריחה לא בטוחה באור צדדי. ')+'עציץ דמוי ראטן Ø25, עומק 20. תחתית ב־220.';
   document.getElementById('sheetOpts').innerHTML='';
+  addHideBtn('h'+HANG.indexOf(h));
   sheet.hidden=false; document.body.classList.add('sheetOpen');
 }
+// ---------- hide / restore (costs version only) ----------
+function addHideBtn(id){
+  if(!EDITOR || !window.__hide) return;
+  var b=document.createElement('button'); b.type='button'; b.textContent='הסתרה'; b.className='hidebtn';
+  b.addEventListener('click',function(){ window.__hide(id); closeSheet(); });
+  var box=document.getElementById('sheetOpts'); box.insertBefore(b,box.firstChild);
+}
+var ITEM_TEXT={cab:'100 × 30, גובה 170. על הקיר המערבי.', ac:'מנוע מזגן 80 × 30, גובה 55. על הרצפה בפינה עם הקיר המערבי.', woman:'דמות בגובה 170, לקנה מידה.'};
+function openItem(id){
+  var names={cab:'ארונית',ac:'מזגן',woman:'הדמות'};
+  document.getElementById('sheetTitle').textContent=names[id]||id;
+  document.getElementById('sheetText').textContent=ITEM_TEXT[id]||'';
+  var box=document.getElementById('sheetOpts'); box.innerHTML='';
+  if(id==='cab'){
+    var tg=document.querySelector('[data-tog=cabopen]'), open=tg && tg.getAttribute('aria-pressed')==='true';
+    var b=document.createElement('button'); b.type='button'; b.textContent=open?'סגירת הדלתות':'פתיחת הדלתות';
+    b.addEventListener('click',function(){ if(tg) tg.click(); openItem('cab'); }); box.appendChild(b);
+  }
+  addHideBtn(id);
+  sheet.hidden=false; document.body.classList.add('sheetOpen');
+}
+function openHidden(){
+  var list=window.__hiddenList?window.__hiddenList():[];
+  if(!list.length){ closeSheet(); return; }
+  document.getElementById('sheetTitle').textContent='פריטים מוסתרים';
+  document.getElementById('sheetText').textContent='לוחצים על פריט כדי להחזיר אותו.';
+  var box=document.getElementById('sheetOpts'); box.innerHTML='';
+  var all=document.createElement('button'); all.type='button'; all.textContent='החזרת הכל'; all.setAttribute('aria-pressed','true');
+  all.addEventListener('click',function(){ list.forEach(function(it){ window.__hide(it.id,false); }); closeSheet(); }); box.appendChild(all);
+  list.forEach(function(it){ var b=document.createElement('button'); b.type='button'; b.textContent='↩ '+it.name;
+    b.addEventListener('click',function(){ window.__hide(it.id,false); openHidden(); }); box.appendChild(b); });
+  sheet.hidden=false; document.body.classList.add('sheetOpen');
+}
+
 
 // ---------- 3D ----------
 (function(){
@@ -393,6 +424,20 @@ function openHang(h){
     var t=new THREE.CanvasTexture(c); t.wrapS=t.wrapT=THREE.RepeatWrapping; t.repeat.set(6,3); return t;
   }
   var basketGeo=new THREE.LatheGeometry([new THREE.Vector2(0.01,0),new THREE.Vector2(6.5,1.2),new THREE.Vector2(10,5.5),new THREE.Vector2(11.9,11),new THREE.Vector2(12.5,16),new THREE.Vector2(12.5,20)],28);
+  // ---------- items that can be hidden (costs version) ----------
+  var ITEMS={}, HIDDEN={};
+  function regItem(id,name,obj){ obj.userData.itemId=id; ITEMS[id]={name:name,obj:obj}; }
+  function shown(o){ while(o){ if(!o.visible) return false; o=o.parent; } return true; }
+  function applyHidden(){
+    Object.keys(ITEMS).forEach(function(id){ ITEMS[id].obj.visible=!HIDDEN[id]; });
+    L.dims.children.forEach(function(c){ c.visible=!(c.userData.owner && HIDDEN[c.userData.owner]); });
+    var cb=document.querySelector('[data-tog=cab]'); if(cb) cb.setAttribute('aria-pressed',HIDDEN.cab?'false':'true');
+    var n=Object.keys(HIDDEN).filter(function(id){ return HIDDEN[id] && ITEMS[id]; }).length, hb=document.getElementById('hiddenBtn');
+    if(hb){ hb.textContent='מוסתרים ('+n+')'; hb.style.display=(EDITOR && n)?'':'none'; }
+  }
+  window.__hide=function(id,on){ if(on===undefined) on=true; if(on) HIDDEN[id]=true; else delete HIDDEN[id]; applyHidden(); };
+  window.__hiddenList=function(){ return Object.keys(HIDDEN).filter(function(id){ return HIDDEN[id] && ITEMS[id]; }).map(function(id){ return {id:id,name:ITEMS[id].name}; }); };
+
   var hangHit=[];
   HANG.forEach(function(h,idx){
     var g=new THREE.Group(); g.position.set(h.x,POT_BOTTOM,POT_Z);
@@ -406,11 +451,12 @@ function openHang(h){
     var cm=new THREE.LineBasicMaterial({color:0x444444});
     [0,2.09,4.19].forEach(function(a){ var gg=new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(Math.cos(a)*12.5,POT_H,Math.sin(a)*12.5),ring]); g.add(new THREE.Line(gg,cm)); });
     var gg2=new THREE.BufferGeometry().setFromPoints([ring,new THREE.Vector3(0,HOOK_Y-POT_BOTTOM,0)]); g.add(new THREE.Line(gg2,cm));
-    L.hang.add(g);
+    var pg=new THREE.Group(); L.hang.add(pg); pg.add(g); // one group per pot: pot, plant, chains and bracket
     // wall bracket: plate + arm
-    box(L.hang,M.steel,h.x-2,HOOK_Y-6,W-1,4,12,1);
-    box(L.hang,M.steel,h.x-0.8,HOOK_Y-0.8,POT_Z-0.8,1.6,1.6,W-1-POT_Z+0.8);
+    box(pg,M.steel,h.x-2,HOOK_Y-6,W-1,4,12,1);
+    box(pg,M.steel,h.x-0.8,HOOK_Y-0.8,POT_Z-0.8,1.6,1.6,W-1-POT_Z+0.8);
     bk.userData.hang=idx; hangHit.push(bk);
+    regItem('h'+idx,(h.p==='zygo'?'זיגוקקטוס':'בת שבע')+' · עציץ תלוי '+(idx+1),pg);
   });
 
   // planters
@@ -427,8 +473,10 @@ function openHang(h){
     var plants=new THREE.Group(); g.add(plants);
     body.userData.planter=i; planterHit.push(body);
     L.planters.add(g); planterObjs.push({g:g,plants:plants,body:body});
+    regItem('p'+i,'אדנית '+(i+1),g);
     fillPlanter(i);
   });
+  applyHidden();
   }
   function fillPlanter(i){
     var o=planterObjs[i]; while(o.plants.children.length) o.plants.remove(o.plants.children[0]);
@@ -459,6 +507,7 @@ function openHang(h){
     ball(10.2,0,161.5,-1.6,hair,0.96,1.04,1);           // hair
     ball(5,0,156,-9.5,hair,1,1.2,1);                    // bun
     g.position.set(WOMAN.x,0,WOMAN.z); L.woman.add(g);
+    regItem('woman','הדמות',g);
   })();
   // ---------- cabinet on the west wall ----------
   var cabHit=[];
@@ -498,6 +547,10 @@ function openHang(h){
     [0,1].forEach(function(k){ var bar=new THREE.Mesh(new THREE.BoxGeometry(k?0.8:2*r,k?2*r:0.8,0.6),grey); bar.position.set(cx,cy,a.d+0.5); g.add(bar); });
     box(g,grey,a.w*0.04,6,a.d,a.w*0.18,a.h-12,0.5);   // service panel
   })();
+  regItem('cab','ארונית',L.cab); regItem('ac','מזגן',L.ac);
+  var acHit=[], womanHit=[];
+  L.ac.traverse(function(m){ if(m.isMesh) acHit.push(m); });
+  L.woman.traverse(function(m){ if(m.isMesh) womanHit.push(m); });
   window.__cabStep=window.__cabStep||function(){};
   window.__hl=function(i){ planterObjs.forEach(function(o,k){ o.body.material = (k===i)?hlMat:M.planter; }); };
 
@@ -511,10 +564,11 @@ function openHang(h){
     ctx.fillStyle='#1f2a24'; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.direction=/[֐-׿]/.test(text)?'rtl':'ltr'; ctx.fillText(text,w/2,hh/2+2);
     var t=new THREE.CanvasTexture(c); t.minFilter=THREE.LinearFilter;
     var sp=new THREE.Sprite(new THREE.SpriteMaterial({map:t,depthTest:false,transparent:true})); var H2=h||9;
-    sp.scale.set(H2*c.width/c.height,H2,1); sp.position.set(x,y,z); sp.renderOrder=20; (par||L.dims).add(sp); return sp;
+    sp.scale.set(H2*c.width/c.height,H2,1); sp.position.set(x,y,z); sp.renderOrder=20; sp.userData.owner=dimOwner; (par||L.dims).add(sp); return sp;
   }
+  var dimOwner=null; // the item a dimension belongs to: hidden with it
   var dm=new THREE.LineBasicMaterial({color:0x2b3330,depthTest:false});
-  function line(a,b){ var l=new THREE.Line(new THREE.BufferGeometry().setFromPoints([a,b]),dm); l.renderOrder=19; L.dims.add(l); }
+  function line(a,b){ var l=new THREE.Line(new THREE.BufferGeometry().setFromPoints([a,b]),dm); l.renderOrder=19; l.userData.owner=dimOwner; L.dims.add(l); }
   function dimX(x0,x1,y,z,text){ line(new THREE.Vector3(x0,y,z),new THREE.Vector3(x1,y,z)); [x0,x1].forEach(function(x){ line(new THREE.Vector3(x,y-4,z),new THREE.Vector3(x,y+4,z)); }); label(text,(x0+x1)/2,y+8,z,8); }
   function dimY(x,y0,y1,z,text){ line(new THREE.Vector3(x,y0,z),new THREE.Vector3(x,y1,z)); [y0,y1].forEach(function(y){ line(new THREE.Vector3(x-4,y,z),new THREE.Vector3(x+4,y,z)); }); label(text,x-2,(y0+y1)/2,z,8); }
   function dimZ(x,y,z0,z1,text){ line(new THREE.Vector3(x,y,z0),new THREE.Vector3(x,y,z1)); [z0,z1].forEach(function(z){ line(new THREE.Vector3(x-4,y,z),new THREE.Vector3(x+4,y,z)); }); label(text,x,y+7,(z0+z1)/2,8); }
@@ -526,15 +580,18 @@ function openHang(h){
     dimY(-40,0,H,W/2,'274 תקרה');
     dimZ(-14,2,0,W,'145 רוחב');
     dimZ(SEG[2].x0+SEG[2].w/2,H+4,W,W+T,'20');
-    dimY(HANG[0].x-POT_R-6,0,POT_BOTTOM,POT_Z,'220');
+    dimOwner='h0'; dimY(HANG[0].x-POT_R-6,0,POT_BOTTOM,POT_Z,'220');
+    dimOwner='cab';
     dimX(CAB.x0,CAB.x0+CAB.l,CAB.h+6,CAB.d/2,String(CAB.l));
     dimZ(CAB.x0+CAB.l+6,CAB.h+2,0,CAB.d,String(CAB.d));
     dimY(CAB.x0+CAB.l+6,0,CAB.h,2,String(CAB.h));
     // AC unit: 80 along the north wall (z), 30 deep (x), 55 high
+    dimOwner='ac';
     dimZ(ACU.x0-6,ACU.h+4,ACU.z0,ACU.z0+ACU.w,'מזגן '+ACU.w); dimX(ACU.x0,ACU.x0+ACU.d,ACU.h+4,ACU.z0-2,String(ACU.d)); dimY(ACU.x0-6,0,ACU.h,ACU.z0-2,String(ACU.h));
     // size of every planter (length × width × depth) and every hanging pot (diameter × depth)
-    PLANTERS.forEach(function(x0){ label(PL_L+' × '+PL_D+' × '+PL_H,x0+PL_L/2,PL_H/2,PL_Z0-3,6); });
-    HANG.forEach(function(h){ label('Ø'+(POT_R*2)+' × '+POT_H,h.x,POT_BOTTOM-8,POT_Z-POT_R-3,6); });
+    PLANTERS.forEach(function(x0,i){ dimOwner='p'+i; label(PL_L+' × '+PL_D+' × '+PL_H,x0+PL_L/2,PL_H/2,PL_Z0-3,6); });
+    HANG.forEach(function(h,j){ dimOwner='h'+j; label('Ø'+(POT_R*2)+' × '+POT_H,h.x,POT_BOTTOM-8,POT_Z-POT_R-3,6); });
+    dimOwner=null;
   }
   var tm=new THREE.LineBasicMaterial({color:0x2f6b3a,depthTest:false}), cm=new THREE.MeshBasicMaterial({color:0x2f6b3a,depthTest:false});
   function arrow(a,b){ var l=new THREE.Line(new THREE.BufferGeometry().setFromPoints([a,b]),tm); l.renderOrder=19; L.tags.add(l);
@@ -549,7 +606,7 @@ function openHang(h){
       label(h.p==='zygo'?'זיגוקקטוס':'בת שבע',h.x,y,z,7,L.tags);
       arrow(new THREE.Vector3(h.x,y+4,z),new THREE.Vector3(h.x,POT_BOTTOM+POT_H/2,POT_Z-POT_R)); });
   }
-  function rebuildDims(){ while(L.dims.children.length) L.dims.remove(L.dims.children[0]); buildDims(); buildTags(); }
+  function rebuildDims(){ while(L.dims.children.length) L.dims.remove(L.dims.children[0]); buildDims(); buildTags(); applyHidden(); }
   if(document.fonts && document.fonts.ready){ document.fonts.ready.then(rebuildDims); } else rebuildDims();
   onVariant=function(){ buildPlanters(); rebuildDims(); }; window.__tags=buildTags;
 
@@ -573,7 +630,7 @@ function openHang(h){
   document.querySelectorAll('[data-view]').forEach(function(b){ b.addEventListener('click',function(){ goView(b.dataset.view); }); });
   document.querySelectorAll('[data-tog]').forEach(function(b){ b.addEventListener('click',function(){
     var on=b.getAttribute('aria-pressed')!=='true'; b.setAttribute('aria-pressed',on?'true':'false');
-    if(b.dataset.tog==='dims') L.dims.visible=on; if(b.dataset.tog==='ceil') L.ceil.visible=on; if(b.dataset.tog==='west') L.west.visible=on; if(b.dataset.tog==='tags') L.tags.visible=on; if(b.dataset.tog==='woman') L.woman.visible=on; if(b.dataset.tog==='cab') L.cab.visible=on; if(b.dataset.tog==='cabopen' && window.__cabOpen){ window.__cabOpen(on); if(on){ L.cab.visible=true; var cv=document.querySelector('[data-tog=cab]'); if(cv) cv.setAttribute('aria-pressed','true'); goView('cab'); } }
+    if(b.dataset.tog==='dims') L.dims.visible=on; if(b.dataset.tog==='ceil') L.ceil.visible=on; if(b.dataset.tog==='west') L.west.visible=on; if(b.dataset.tog==='tags') L.tags.visible=on; if(b.dataset.tog==='woman') L.woman.visible=on; if(b.dataset.tog==='cab') window.__hide('cab',!on); if(b.dataset.tog==='cabopen' && window.__cabOpen){ window.__cabOpen(on); if(on){ window.__hide('cab',false); goView('cab'); } else if(!document.querySelector('[data-view]')) goView('overview'); }
   }); });
   goView('overview',true);
 
@@ -585,11 +642,18 @@ function openHang(h){
     var r=renderer.domElement.getBoundingClientRect(); ptr.set(((e.clientX-r.left)/r.width)*2-1, -((e.clientY-r.top)/r.height)*2+1);
     ray.setFromCamera(ptr,camera);
     // the client page (EDITOR=false) is an illustration only: tapping a planter or pot does nothing
-    var targets=(EDITOR?planterHit.concat(hangHit):[]).concat(L.cab.visible?cabHit:[]);
-    var hit=ray.intersectObjects(targets,false)[0];
+    var targets=(EDITOR?planterHit.concat(hangHit,acHit,womanHit):[]).concat(cabHit);
+    var hit=ray.intersectObjects(targets,false).filter(function(h){ return shown(h.object); })[0];
     if(!hit){ closeSheet(); return; }
-    if(hit.object.userData.cab){ var cb=document.querySelector('[data-tog=cabopen]'); if(cb) cb.click(); return; }
-    if(hit.object.userData.planter!=null) openPlanter(hit.object.userData.planter); else openHang(HANG[hit.object.userData.hang]);
+    var o=hit.object;
+    if(o.userData.cab){
+      if(EDITOR) openItem('cab'); else { var cb=document.querySelector('[data-tog=cabopen]'); if(cb) cb.click(); }
+      return;
+    }
+    if(o.userData.planter!=null){ openPlanter(o.userData.planter); return; }
+    if(o.userData.hang!=null){ openHang(HANG[o.userData.hang]); return; }
+    while(o && !o.userData.itemId) o=o.parent;
+    if(o) openItem(o.userData.itemId);
   });
 
   function resize(){ var w=stage.clientWidth, h=stage.clientHeight; renderer.setSize(w,h,false); camera.aspect=w/h; camera.fov = w<h ? 60 : 45; camera.updateProjectionMatrix(); }
