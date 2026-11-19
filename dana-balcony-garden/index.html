@@ -12,6 +12,19 @@
 .cmp{margin:14px 0 22px}
 .cmp button{margin-bottom:4px}
 .cmp .note{margin:.2rem 0 .5rem}
+.sunbar{flex-direction:column;align-items:stretch;width:min(560px,100%)}
+.sunrow{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.sunrow input[type=range]{flex:1;min-width:150px;accent-color:#e0a800}
+.sunrow input[type=date]{font:inherit;color:var(--ink);background:var(--off);border:1px solid var(--line);border-radius:999px;padding:5px 10px;min-height:36px}
+#sunRead{font-size:.82rem;color:var(--muted);white-space:nowrap}
+.lg{font-size:.75rem;color:var(--muted);display:inline-flex;align-items:center;gap:3px}
+.lg i{width:12px;height:12px;border-radius:3px;display:inline-block}
+.phero{display:block;width:100%;max-height:60vh;object-fit:cover;border-radius:12px;margin:10px 0 4px;background:var(--off)}
+.phero.noimg{height:160px;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:.9rem}
+.pcr{font-size:.72rem;color:var(--muted);margin:0 0 8px}
+.infobtn{background:#fff3c4!important;color:#7a4a00!important;border:1px solid #e8c766!important;font-weight:500;font-size:.78rem!important;min-height:28px!important;padding:2px 10px!important}
+#plantBody h2{margin:.4rem 0 .2rem}
+#plantBody th{width:32%;color:var(--muted);font-weight:500}
 :root{
   --sky:#e9ecea; --ink:#1f2a24; --muted:#5b6a61;
   --panel:rgba(255,255,255,.88); --line:rgba(31,42,36,.16);
@@ -69,7 +82,7 @@ ul.as{margin:.3rem 0;padding-inline-start:1.2rem;font-size:.88rem;line-height:1.
 .pick{grid-template-columns:repeat(auto-fill,minmax(240px,1fr))}
 .pk{border:1px solid #dfe5dc;border-radius:12px;padding:8px 10px;display:grid;gap:6px}
 .pk b{font-size:.9rem;font-weight:600}
-.slotH{width:100%;margin:6px 0 2px;font-size:.85rem;font-weight:600}
+.slotH{width:100%;margin:6px 0 2px;font-size:.85rem;font-weight:600;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 body.paneOpen .dock{display:none}
 body.paneOpen .title{visibility:hidden}
 #sheet{position:fixed;right:14px;left:14px;bottom:calc(env(safe-area-inset-bottom,0px) + 12px);z-index:4;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:12px 14px;backdrop-filter:blur(10px);max-width:560px;margin:0 auto}
@@ -79,26 +92,29 @@ body.paneOpen .title{visibility:hidden}
 #sheet .opts{display:flex;flex-wrap:wrap;gap:6px}
 #sheet .close{position:absolute;left:10px;top:8px;min-height:30px;padding:3px 10px}
 body.sheetOpen .dock{display:none}
-#sheet .hidebtn{background:var(--warnbg);color:var(--warn);border-color:var(--warn);font-weight:500}
-#hiddenBtn{background:var(--warnbg);color:var(--warn);border-color:var(--warn)}
+#sheet .hidebtn{background:transparent;color:var(--muted);border:1px dashed var(--line);font-weight:400;font-size:.78rem;min-height:28px;padding:2px 10px}
+#hiddenBtn,#resetPosBtn{background:var(--warnbg);color:var(--warn);border-color:var(--warn);pointer-events:auto;font-weight:500;box-shadow:0 2px 8px rgba(0,0,0,.18)}
+.pills{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;pointer-events:none}
+#resetPosBtn{background:var(--panel);color:var(--ink);border-color:var(--line)}
 @media (max-width:560px){ .title p{display:none} .title h1{font-size:.95rem} button{padding:6px 10px;font-size:.8rem;min-height:34px} }
 </style>
 </head>
 <body>
-<div id="stage" aria-label="מודל תלת־ממד של המרפסת. גוררים כדי לסובב"></div>
+<div id="stage" aria-label="מודל תלת־ממד של המרפסת. גוררים כדי לסובב, נוגעים באדנית כדי לבחור צמח"></div>
 
 <div class="head">
   <div class="title">
     <h1>גינת מרפסת דנה</h1>
-    <p>890 × 145, תקרה 274. 7 אדניות 53×30×25, 7 עציצים תלויים, מטפס על הבלוקים. ארונית 100×30×170 ומזגן בקיר המערבי.</p>
+    <p id="subT">990 × 145, תקרה 274. 7 אדניות 53×30×25, 7 עציצים תלויים, מטפס על הבלוקים. ארונית 90×47×170 ומזגן בקיר המערבי.</p>
   </div>
 </div>
 
 <div class="dock">
   <div class="chips" id="varchips" style="display:none"><label for="varSel" class="vlab">הצעה</label><select id="varSel"></select></div>
+  <div class="pills"><button type="button" id="resetPosBtn" style="display:none">↺ איפוס מיקומים</button><button type="button" id="hiddenBtn" style="display:none"></button></div>
   <div class="chips" id="camchips">
     <button type="button" data-tog="dims" aria-pressed="true">מידות</button>
-    <button type="button" data-tog="cab" aria-pressed="true">ארונית</button>
+    <button type="button" data-tog="cab" aria-pressed="false">ארונית</button>
     <button type="button" data-tog="cabopen" aria-pressed="false">ארונית פתוחה</button>
   </div>
   <div class="hint" id="hint">גוררים כדי לסובב · שתי אצבעות להתקרב</div>
@@ -111,7 +127,7 @@ body.sheetOpen .dock{display:none}
   <div class="opts" id="sheetOpts"></div>
 </div>
 
-
+<div hidden><div id="svgwrap"></div><div id="cmpwrap"></div><p id="varNote"></p><table><tbody id="bom"></tbody></table><span id="bomTotal"></span><p id="bomWarn"></p><div id="pickList"></div><p id="pickNote"></p><div id="costBody"></div><p id="costNote"></p><div id="plantBody"></div><button type="button" id="plantBack"></button><section id="pane-plant"></section><section id="pane-cost"></section><section id="pane-draw"></section><section id="pane-list"></section></div>
 
 <div class="fail" id="fail">המודל לא נטען כי לא הייתה גישה לספריית התלת־ממד. השרטוט והרשימה עדיין זמינים בלשוניות למעלה.</div>
 
@@ -119,51 +135,79 @@ body.sheetOpen .dock{display:none}
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
 <script>
 // ---------- shared data ----------
-var LEN=890, W=145, H=274, SILL=127, T=20;
-var SEG=[{t:'wall',w:200},{t:'win',w:158},{t:'pillar',w:31},{t:'win',w:154},{t:'wall',w:194},{t:'win',w:153}];
+var LEN=990, W=145, H=274, SILL=127, T=20;
+var SEG=[{t:'win',w:100},{t:'wall',w:200},{t:'win',w:158},{t:'pillar',w:31},{t:'win',w:154},{t:'wall',w:194},{t:'win',w:153}];
 (function(){ var x=0; SEG.forEach(function(s){ s.x0=x; s.x1=x+s.w; x+=s.w; }); })();
 var NAMES={win:'פתח',wall:'קיר',pillar:'עמוד'};
-var HANG=[{x:50,p:'zygo',c:0x8b9a7a},{x:100,p:'hoya',c:0xc29a6a},{x:150,p:'zygo',c:0x8b9a7a},
-          {x:373.5,p:'hoya',c:0xc29a6a},
-          {x:591.5,p:'zygo',c:0x8b9a7a},{x:640,p:'hoya',c:0xc29a6a},{x:688.5,p:'zygo',c:0x8b9a7a}];
+var HANG=[{x:150,p:'zygo',c:0x8b9a7a},{x:200,p:'hoya',c:0xc29a6a},{x:250,p:'zygo',c:0x8b9a7a},
+          {x:473.5,p:'hoya',c:0xc29a6a},
+          {x:691.5,p:'zygo',c:0x8b9a7a},{x:740,p:'hoya',c:0xc29a6a},{x:788.5,p:'zygo',c:0x8b9a7a}];
 var POT_BOTTOM=220, POT_H=20, POT_R=12.5, HOOK_Y=262, POT_Z=W-18;
 var PL_L=53, PL_D=30, PL_H=25, PL_Z0=W-2-PL_D;
-var WOMAN={x:529,z:62,h:170};
-var CAB={x0:579,l:100,d:30,h:170}; // cabinet on the west wall, on the woman's left (toward the window-153 end), as tall as she is
+var WOMAN={x:760,z:75,h:170};
+var CAB={x0:435,l:90,d:47,h:170}; var SUN={x0:0,x1:300}; // x=0 is the SOUTH end (wall 200). cabinet: north of the glass-door recess (35–335); sunny zone along wall 200 // cabinet on the west wall, on the woman's left (toward the window-153 end), as tall as she is
 // AC outdoor unit on the floor in the corner of the window-153 end and the west wall: back to that end (x=890, 10 off it), fan facing into the balcony (-x). w runs along the end (z), d along the balcony (x)
-var ACU={x0:850,z0:5,w:80,d:30,h:55};
+var ACU={x0:950,z0:5,w:80,d:30,h:55};
 var EVEN9=[10,112.1,214.3,316.4,418.5,520.6,622.8,724.9,827], EVEN7=[10,146.2,282.3,418.5,554.7,690.8,827];
 var VARIANTS=[
- {n:'שלושה סוגים', x:[23.5,123.5,252.5,439.5,565,662,787], p:['chamae','spath','trach','trach','spath','chamae','trach'], d:'מטפס בפתחים. בכל קיר זוג: צמח גבוה בצד החיצוני וצמח נמוך פורח בצד הפנימי – תמונת ראי בין שני הקירות.'}
+ {n:'6 אדניות גונדולה', L:78, H:25, x:[11,161,340,527,701,874.5], p:[['taberna','trach'],['chamae','spath'],['trach','stephan'],['dipla','trach'],['spath','zamia'],['trach','dipla']], d:'אדנית מתחת לכל פתח, שם האור, ואדנית אחת בלבד מתחת לכל קיר – 6 אדניות במקום 7. בכל פתח יסמין כוכבים, לרצף ירוק וריחני לאורך כל המעקה. מתחת לפתח 100 בדרום, המקום הכי מואר (כ־18–43 מול לפי החישוב) – טברנה ריחנית ליד היסמין. בפתח 158 סטפנוטיס, בפתחים 154 ו־153 דיפלדניה. מתחת לקיר 200 – חמדוריאה וספאתיפילום; מתחת לקיר 194, הכי מוצל – ספאתיפילום וזמיה.',
+  pot:{n:'אדנית גונדולה 78 (גרדן סנטר)',dt:'78 × 30 × 25 · חול / שחור / אפור',price:null,tag:'אתר',soil:50,c:0xd8ccb4,cs:'#e2d6bf',stripes:0}}
 ];
 var PLANTERS;
 function LEN_OF(i){ return VARIANTS[i].L||53; }
-function PER(L){ return 1; }
-function norm(c){ return [Array.isArray(c)?c[0]:c]; }
-function combo(c){ return SHORT[norm(c)[0]]; }
+function PER(L){ return L>=70?2:1; }
+function norm(c){ return Array.isArray(c)?c.slice():[c]; }
+function combo(c){ return norm(c).map(function(k){ return SHORT[k]; }).join(' + '); }
+function POT(i){ return VARIANTS[i].pot; }
 var FLOOR={
-  chamae:{n:'חמדוריאה אלגנס',s:9,price:null,src:'',size:'עציץ 18',why:'דקל של צל, עולה מעל הבלוקים אל תוך הפתח'},
-  spath:{n:'ספאתיפילום',s:9,price:null,src:'',size:'עציץ 17',why:'פריחה לבנה בצל מואר'},
-  zamia:{n:'זמיקולקס',s:9,price:null,src:'',size:'עציץ 18',why:'הכי עמיד, כמעט בלי טיפול'},
-  fern:{n:'שרך בוסטון',s:9,price:null,src:'',size:'עציץ 15',why:'נשפך מעל דופן האדנית'},
-  pseud:{n:'פסאודרנתמום',s:7,price:null,src:'',size:'',why:'עלווה מגוונת; דוהה מעט בצל'},
-  cordy:{n:'קורדילין טנגו',s:6,price:null,src:'',size:'4 ליטר',why:'צבע בורדו – נחלש בצל'},
-  trach:{n:'יסמין כוכבים (טרכלוספרמון)',s:7,price:null,src:'',size:'',why:'מטפס על הבלוקים ונכנס לחורים; פריחה לבנה ריחנית, פחות פרחים בחצי צל',climb:1},
-  taberna:{n:'טברנה מונטנה',s:6,price:null,src:'',size:'10 ליטר',why:'שיח עם פרחים לבנים ריחניים; בצל מואר פורח פחות. מוהל חלבי – להרחיק מחיות'},
-  dieff:{n:'דיפנבכיה טרופיק',s:7,price:null,src:'',size:'עציץ 18',why:'עלים גדולים לבן־ירוק; רגישה לקור ולרוח, רעילה'},
-  stephan:{n:'סטפנוטיס',s:4,price:null,src:'',size:'7 ליטר',why:'דומה ליסמין ומטפס, אבל צריך יותר אור כדי לפרוח',climb:1}
+  chamae:{n:'חמדוריאה אלגנס',s:9,price:null,src:'תווית',size:'עציץ 18',why:'דקל של צל, עולה מעל הבלוקים אל תוך הפתח'},
+  spath:{n:'ספאתיפילום',s:9,price:null,src:'תווית',size:'עציץ 17',why:'פריחה לבנה בצל מואר'},
+  zamia:{n:'זמיקולקס',s:9,price:null,src:'תווית',size:'עציץ 18',why:'הכי עמיד, כמעט בלי טיפול'},
+  fern:{n:'שרך בוסטון',s:9,price:null,src:'תווית',size:'עציץ 15',why:'נשפך מעל דופן האדנית'},
+  pseud:{n:'פסאודרנתמום',s:7,price:null,src:'',size:'',why:'עלווה לבן־ורוד־ירוק ופרחים קטנים. באור החורף של הקצה הדרומי הצבעים יחזיקו, בקיץ ידהו מעט (הערכה שלי)'},
+  cordy:{n:'קורדילין טנגו',s:6,price:null,src:'תווית',size:'4 ליטר',why:'צבע בורדו – נחלש בצל'},
+  trach:{n:'יסמין כוכבים (טרכלוספרמון)',s:9,price:null,src:'',size:'',why:'מטפס על הבלוקים ונכנס לחורים; פריחה לבנה ריחנית באביב. מעל הבלוקים יקבל שמש בוקר (הערכה שלי)',climb:1},
+  taberna:{n:'טברנה מונטנה',s:8,price:null,src:'תווית',size:'10 ליטר',why:'שיח עם פרחים לבנים ריחניים; עם שמש בוקר או שמש חורף יפרח יותר מבצל (הערכה שלי). מוהל חלבי – להרחיק מחיות'},
+  dieff:{n:'דיפנבכיה טרופיק',s:7,price:null,src:'תווית',size:'עציץ 18',why:'עלים גדולים לבן־ירוק; רגישה לקור ולרוח, רעילה'},
+  stephan:{n:'סטפנוטיס',s:8,price:null,src:'תווית',size:'7 ליטר',why:'מטפס עם פרחים לבנים שעווניים וריחניים בקיץ. צריך אור חזק בלי שמש צהריים – שמש בוקר מהפתח מתאימה לו (הערכה שלי)',climb:1},
+  none:{n:'בלי צמח',s:0,price:null,src:'',size:'',why:'המקום הזה באדנית נשאר ריק'},
+  dipla:{n:'דיפלדניה ורודה',s:8,price:null,src:'אתר אייל',size:'10 ליטר',why:'מטפסת עם פרחים ורודים גדולים מהאביב עד הסתיו; שמש הבוקר מהפתח מספיקה לה (הערכה שלי). בלי ריח',climb:1}
 };
-var SHORT={chamae:'חמדוריאה',spath:'ספאתיפילום',zamia:'זמיה',fern:'שרך',pseud:'פסאודרנתמום',cordy:'קורדילין',trach:'יסמין',stephan:'סטפנוטיס',taberna:'טברנה',dieff:'דיפנבכיה'};
-var store={v:1,c:{}};
+var SHORT={chamae:'חמדוריאה',spath:'ספאתיפילום',zamia:'זמיה',fern:'שרך',pseud:'פסאודרנתמום',cordy:'קורדילין',trach:'יסמין',stephan:'סטפנוטיס',dipla:'דיפלדניה',none:'ריק',taberna:'טברנה',dieff:'דיפנבכיה'};
+var PINFO={
+ chamae:{lat:'Chamaedorea elegans',img:'ph/chamae.jpg',need:'2–6',w:'בינונית',h:'1–2 מ׳',c:'סובלת חורף מתון',pet:'לא רעילה',fl:'קטנה וצהובה, לא העיקר'},
+ spath:{lat:'Spathiphyllum',img:'ph/spath.jpg',need:'3–8, פורח יותר מעל 5',w:'מרובה – לשמור לח',h:'40–60 ס״מ',c:'נפגע מתחת ל־10 מעלות',pet:'רעיל בבליעה',fl:'לבנה'},
+ zamia:{lat:'Zamioculcas zamiifolia',img:'ph/zamia.jpg',need:'2–6',w:'מועטה – לתת למצע להתייבש',h:'60–90 ס״מ',c:'לא מתחת ל־10 מעלות',pet:'רעילה בבליעה',fl:'נדירה'},
+ fern:{lat:'Nephrolepis exaltata',img:'ph/fern.jpg',need:'3–8',w:'מרובה, אוהב לחות',h:'40–90 ס״מ, משתפל',c:'סובל חורף מתון',pet:'לא רעיל',fl:'אין – שרך'},
+ pseud:{lat:'Pseuderanthemum (זיהוי משוער)',img:'ph/pseud.jpg',need:'6–12 (הערכה)',w:'בינונית',h:'1–1.5 מ׳',c:'רגיש לקור',pet:'לא נבדק',fl:'פרחים קטנים'},
+ cordy:{lat:'Cordyline fruticosa',img:'ph/cordy.jpg',need:'8–15 (הערכה)',w:'בינונית',h:'1–3 מ׳',c:'רגיש לקור חזק',pet:'רעיל לכלבים וחתולים',fl:'לא העיקר – עלווה בורדו'},
+ trach:{lat:'Trachelospermum jasminoides',img:'',need:'10–20',w:'בינונית, ניקוז טוב (כללי)',h:'מטפס 3–6 מ׳ (כללי)',c:'עמיד לקור (כללי)',pet:'מוהל חלבי – להרחיק (כללי)',fl:'לבנה וריחנית מאוד, אביב עד תחילת קיץ (כללי)'},
+ taberna:{lat:'Tabernaemontana divaricata',img:'ph/taberna.jpg',cr:'תמונה: ויקימדיה קומונס – Brihaspati (CC BY 4.0) או Arif tonmoy (CC BY-SA 3.0)',need:'8–20',w:'בינונית',h:'1.5–2.5 מ׳, בעציץ פחות',c:'רגישה לכפור',pet:'מוהל חלבי – להרחיק',fl:'לבנה וריחנית'},
+ dieff:{lat:'Dieffenbachia Tropic',img:'ph/dieff.jpg',need:'3–8 (הערכה)',w:'בינונית',h:'0.6–1.5 מ׳',c:'נפגעת מתחת ל־10–12 מעלות',pet:'רעילה – מוהל מגרה',fl:'נדירה'},
+ stephan:{lat:'Stephanotis floribunda',img:'ph/stephan.jpg',cr:'תמונה: ויקימדיה קומונס – Kor!An (Андрей Корзун), CC BY-SA 3.0',need:'10–20',w:'בינונית; לחה יותר בקיץ',h:'מטפס 2–4 מ׳',c:'לא מתחת ל־10 מעלות',pet:'לא נבדק',fl:'לבנה, שעוונית וריחנית, קיץ'},
+ dipla:{lat:'Mandevilla sanderi (Dipladenia)',img:'ph/dipla.jpg',need:'12–25',w:'בינונית, אחרי שהמצע מתייבש מעט',h:'מטפס 2–4 מ׳',c:'רגישה לכפור',pet:'לא ידועה כרעילה',fl:'ורודה, אביב–סתיו, בלי ריח'},
+ zygo:{n:'זיגוקקטוס (שלומברגרה)',lat:'Schlumbergera',img:'ph/zygo.jpg',s:9,price:null,src:'תווית',size:'קערה תלויה 15',why:'קקטוס יער, לא של מדבר. הלילות הקרירים מעוררים פריחה. אוהב עציץ צפוף.',need:'4–8',w:'בינונית, לא להציף',h:'30–40 ס״מ, משתפל',c:'פורח בעונה הקרירה',pet:'לא רעיל',fl:'ורוד־אדום, חורף'},
+ hoya:{n:'בת שבע (הויה)',lat:'Hoya carnosa (כנראה)',img:'',s:6,price:null,size:'לא בקטלוג',why:'גדלה טוב באור עקיף, אבל כדי לפרוח צריכה אור בהיר. אוהבת עציץ צפוף.',need:'6–12 כדי לפרוח',w:'מועטה–בינונית, להתייבש בין השקיות (כללי)',h:'משתלשלת (כללי)',c:'רגישה לקור (כללי)',pet:'לא נבדק',fl:'כדורים ורוד־לבן, ריחניים בערב (כללי)'}
+};
+var store={v:0,c:{}};
 var NONAMES=true;
 var EDITOR=false; // full (costs) version; the client build sets this to false
-try{ var sv=JSON.parse(null||'null'); if(sv && typeof sv.v==='number' && sv.c) store=sv; }catch(e){}
 
-function variantChoice(i){ var c=store.c[i], d=VARIANTS[i].p; var ok=c && c.length===d.length && c.every(function(x){ return norm(x).every(function(k){return FLOOR[k];}); }); return (ok?c:d).map(norm); }
+
+// ---------- saved set (the שמירה button): proposal, plants, positions, hidden items, irrigation ----------
+var SAVED=null;
+if(SAVED){ try{
+  (SAVED.pos&&SAVED.pos.p||[]).forEach(function(xs,i){ if(VARIANTS[i] && xs && xs.length===VARIANTS[i].x.length) xs.forEach(function(x,k){ VARIANTS[i].x[k]=x; }); });
+  if(SAVED.pos){ (SAVED.pos.h||[]).forEach(function(x,j){ if(HANG[j]) HANG[j].x=x; }); if(SAVED.pos.cab!=null) CAB.x0=SAVED.pos.cab; if(SAVED.pos.ac){ ACU.x0=SAVED.pos.ac[0]; ACU.z0=SAVED.pos.ac[1]; } if(SAVED.pos.woman){ WOMAN.x=SAVED.pos.woman[0]; WOMAN.z=SAVED.pos.woman[1]; } }
+  if(SAVED.c) store={v:typeof SAVED.v==='number'?SAVED.v:1,c:SAVED.c};
+  window.__irr=!!SAVED.irr;
+}catch(e){ SAVED=null; } }
+function variantChoice(i){ var c=store.c[i], d=VARIANTS[i].p; var ok=c && c.length===d.length && c.every(function(x,j){ var a=norm(x); return a.length===norm(d[j]).length && a.every(function(k){return FLOOR[k];}); }); return (ok?c:d).map(norm); }
 var V=Math.max(0,Math.min(store.v,VARIANTS.length-1)); PLANTERS=VARIANTS[V].x; PL_L=LEN_OF(V); PL_H=VARIANTS[V].H||25; var choice=variantChoice(V);
-function saveChoice(){ store.v=V; store.c[V]=choice.map(function(c){return c.slice();}); try{  }catch(e){} }
+function saveChoice(){ store.v=V; store.c[V]=choice.map(function(c){return c.slice();}); try{ localStorage.setItem('danaBalconyV7',JSON.stringify(store)); }catch(e){} }
 var onVariant=null;
-function setVariant(i){ V=i; PLANTERS=VARIANTS[i].x; PL_L=LEN_OF(i); PL_H=VARIANTS[i].H||25; choice=variantChoice(i); saveChoice(); closeSheet(); renderBOM(); drawSVG(); var sel=document.getElementById('varSel'); if(sel) sel.value=String(i); if(onVariant) onVariant(); }
+function setSub(){ var el=document.getElementById('subT'); if(el) el.textContent=LEN+' × 145, תקרה 274. '+PLANTERS.length+' אדניות '+PL_L+'×'+PL_D+'×'+PL_H+(choice[0]&&choice[0].length>1?' עם שני צמחים בכל אחת':'')+', 7 עציצים תלויים, מטפס על הבלוקים. ארונית 90×47×170 ומזגן בקיר המערבי.'; }
+function setVariant(i){ V=i; PLANTERS=VARIANTS[i].x; PL_L=LEN_OF(i); PL_H=VARIANTS[i].H||25; choice=variantChoice(i); saveChoice(); closeSheet(); renderBOM(); drawSVG(); setSub(); var sel=document.getElementById('varSel'); if(sel) sel.value=String(i); if(onVariant) onVariant(); }
 
 // ---------- tabs ----------
 (function(){
@@ -173,17 +217,212 @@ function setVariant(i){ V=i; PLANTERS=VARIANTS[i].x; PL_L=LEN_OF(i); PL_H=VARIAN
     var k=b.dataset.tab;
     document.getElementById('pane-draw').hidden = k!=='draw';
     document.getElementById('pane-list').hidden = k!=='list';
+    var pp=document.getElementById('pane-plant'); if(pp) pp.hidden=true;
+    document.getElementById('pane-cost').hidden = k!=='cost'; if(k==='cost') renderCost();
     document.body.classList.toggle('paneOpen', k!=='model');
     if(k!=='model') closeSheet();
   }); });
 })();
 
+// ---------- list / BOM ----------
+function fmt(n){ return n.toLocaleString('he-IL')+' ₪'; }
 function renderBOM(){}
+function renderCost(){}
 var onChoice=null;
 function where(i){ var c=PLANTERS[i]+PL_L/2; var sg=SEG.filter(function(s){return c>=s.x0&&c<s.x1;})[0]; return (sg.t==='win'?'מתחת לפתח ':'מתחת לקיר ')+sg.w; }
 function setChoice(i,slot,k){ choice[i][slot]=k; saveChoice(); renderBOM(); drawSVG(); if(onChoice) onChoice(i); }
 
-function drawSVG(){}
+// ---------- drawing (SVG) ----------
+function svgFor(P,C,opt){ opt=opt||{}; var pot=opt.pot||POT(V);
+  // the drawing is mirrored left-right so it matches the real layout (south = the wall-200 end, on the right when facing the openings); texts are kept readable
+  function fin(){ return o.join('').replace(/^(<svg[^>]*>)/,'$1<g transform="matrix(-1 0 0 1 '+Wd+' 0)">').replace(/<\/svg>$/,'</g></svg>').replace(/<text [^>]*>/g,function(tag){ var m=/ x="([^"]+)"/.exec(tag); if(!m) return tag; var a=/text-anchor="(start|end|middle)"/.exec(tag), na=a?(a[1]==='start'?'end':(a[1]==='end'?'start':'middle')):'end'; tag=a?tag.replace(a[0],'text-anchor="'+na+'"'):tag.replace('<text ','<text text-anchor="'+na+'" '); return tag.replace('<text ','<text transform="matrix(-1 0 0 1 '+(2*parseFloat(m[1]))+' 0)" '); }); }
+  var s=1.2, ml=150, mt=(opt.mini||NONAMES)?50:110, CO=!opt.mini&&!NONAMES, Wd=ml+LEN*s+100;
+  var eTop=mt, eBot=eTop+H*s;               // elevation: y = eBot - h*s
+  var pTop=eBot+150+(CO?96:0)+(opt.mini?0:34), pH=(W+2*T)*s, pBot=pTop+pH; // plan: z=165 at top
+  var cb=(CO?96:0)+(opt.mini?0:34); var Hd=opt.mini?eBot+75:pBot+110+cb;
+  function X(x){ return ml+x*s; }
+  function EY(h){ return eBot-h*s; }
+  function PY(z){ return pTop+(W+T-z)*s; }
+  var o=[];
+  o.push('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+Wd+' '+Hd+'" font-family="Heebo, Arial, sans-serif" direction="ltr"><style>text{paint-order:stroke;stroke:#fff;stroke-width:3px;stroke-linejoin:round}</style>');
+  var b=20*s;
+  o.push('<defs><pattern id="bb" patternUnits="userSpaceOnUse" width="'+b+'" height="'+b+'" x="'+ml+'" y="'+eBot+'"><rect width="'+b+'" height="'+b+'" fill="#d9d1c2"/><circle cx="'+b/2+'" cy="'+b/2+'" r="'+b*0.3+'" fill="#fff"/>'+
+    [[0,0],[b,0],[0,b],[b,b]].map(function(p){return '<circle cx="'+p[0]+'" cy="'+p[1]+'" r="'+b*0.3+'" fill="#fff"/>';}).join('')+
+    '<rect width="'+b+'" height="'+b+'" fill="none" stroke="#bfb6a5" stroke-width=".6"/></pattern>'+
+    '<marker id="t" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M5 0V10" stroke="#333" stroke-width="1.6"/></marker><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#2f6b3a"/></marker></defs>');
+  o.push('<text x="'+X(LEN/2)+'" y="'+(eTop-(CO?80:22))+'" text-anchor="middle" font-size="16" font-weight="700" fill="#1f2a24">'+(opt.title||'קיר מזרחי – מבט מתוך המרפסת')+'</text>');
+  o.push('<text x="'+X(0)+'" y="'+(eTop-(CO?80:22))+'" text-anchor="start" font-size="12" fill="#5b6a61">דרום →</text>');
+  o.push('<text x="'+X(LEN)+'" y="'+(eTop-(CO?80:22))+'" text-anchor="end" font-size="12" fill="#5b6a61">← צפון</text>');
+  // elevation
+  SEG.forEach(function(sg){
+    if(sg.t==='win'){
+      o.push('<rect x="'+X(sg.x0)+'" y="'+EY(H)+'" width="'+sg.w*s+'" height="'+(H-SILL)*s+'" fill="#eaf2f4" stroke="#8a948e" stroke-width="1"/>');
+      o.push('<rect x="'+X(sg.x0)+'" y="'+EY(SILL)+'" width="'+sg.w*s+'" height="'+SILL*s+'" fill="url(#bb)" stroke="#8a948e" stroke-width="1"/>');
+    } else {
+      o.push('<rect x="'+X(sg.x0)+'" y="'+EY(H)+'" width="'+sg.w*s+'" height="'+H*s+'" fill="#efe9df" stroke="#8a948e" stroke-width="1"/>');
+    }
+  });
+  o.push('<line x1="'+X(0)+'" y1="'+EY(0)+'" x2="'+X(LEN)+'" y2="'+EY(0)+'" stroke="#1f2a24" stroke-width="2"/>');
+  o.push('<line x1="'+X(0)+'" y1="'+EY(H)+'" x2="'+X(LEN)+'" y2="'+EY(H)+'" stroke="#1f2a24" stroke-width="2"/>');
+  // planters (in front)
+  var PH={chamae:95,spath:55,zamia:70,fern:40,pseud:75,cordy:85,trach:105,stephan:105,dipla:100,taberna:90,dieff:70};
+  var PC={chamae:'#7fa36f',spath:'#86ad78',zamia:'#4f7a3f',fern:'#9cc56a',pseud:'#c9a1b2',cordy:'#9b3a58',taberna:'#6f9a5f',dieff:'#c3d6a6'};
+  P.forEach(function(x0,i){
+    o.push('<rect x="'+X(x0)+'" y="'+EY(PL_H)+'" width="'+PL_L*s+'" height="'+PL_H*s+'" fill="'+pot.cs+'" stroke="#6b746e" stroke-width="1"/>');
+    if(pot.stripes) [8,13,18].forEach(function(h){ o.push('<line x1="'+X(x0+1)+'" y1="'+EY(h)+'" x2="'+X(x0+PL_L-1)+'" y2="'+EY(h)+'" stroke="#c9c3b6" stroke-width=".8"/>'); });
+    var c=norm(C[i]), same=true, n=c.length;
+    for(var k=0;k<n;k++){
+      var key=c[k], sw=PL_L/n, sx=x0+k*sw, f=FLOOR[key], ph=PH[key]; if(key==='none') continue;
+      if(f.climb){
+        var dxs=[8,22,36,48].map(function(d){ return d*sw/53; });
+        dxs.forEach(function(dx,j){ var d='M'+X(sx+dx)+' '+EY(PL_H); for(var hh=PL_H+12;hh<=ph;hh+=12){ d+=' L'+X(sx+dx+((hh/12)%2?6:-6))+' '+EY(hh); } o.push('<path d="'+d+'" fill="none" stroke="#3f6b35" stroke-width="2"/>');
+          for(var hh2=PL_H+18;hh2<=ph;hh2+=22){ o.push('<circle cx="'+X(sx+dx+((j%2)?4:-4))+'" cy="'+EY(hh2)+'" r="3" fill="#fff" stroke="#9aa" stroke-width=".6"/>'); } });
+        if(!CO&&!NONAMES) o.push('<text x="'+X(sx+sw/2)+'" y="'+(EY(ph)-6)+'" text-anchor="middle" font-size="11" fill="#1f2a24">'+SHORT[key]+'</text>');
+        continue;
+      }
+      o.push('<ellipse cx="'+X(sx+sw/2)+'" cy="'+EY(PL_H+ph/2)+'" rx="'+(sw*0.55*s)+'" ry="'+(ph/2*s)+'" fill="'+(PC[key]||'#7fa36f')+'" fill-opacity=".55" stroke="#4f7a3f" stroke-width="1"/>');
+      if(key==='spath'||key==='taberna'){ [[-.25,.25],[.2,.15],[0,.38]].forEach(function(q){ o.push('<circle cx="'+X(sx+sw/2+q[0]*sw)+'" cy="'+EY(PL_H+ph*(0.5+q[1]))+'" r="3.5" fill="#fff" stroke="#9aa" stroke-width=".6"/>'); }); }
+      if(!CO&&!NONAMES) o.push('<text x="'+X(sx+sw/2)+'" y="'+(EY(PL_H+ph/2)+4)+'" text-anchor="middle" font-size="'+(n>1?9:11)+'" fill="#1f2a24">'+SHORT[key]+'</text>');
+    }
+  });
+  // hanging pots
+  HANG.forEach(function(h){
+    var cx=X(h.x);
+    o.push('<line x1="'+cx+'" y1="'+EY(HOOK_Y)+'" x2="'+cx+'" y2="'+EY(POT_BOTTOM+POT_H)+'" stroke="#555" stroke-width="1"/>');
+    o.push('<path d="M'+(cx-POT_R*s)+' '+EY(POT_BOTTOM+POT_H)+' Q'+(cx-POT_R*s)+' '+EY(POT_BOTTOM)+' '+cx+' '+EY(POT_BOTTOM)+' Q'+(cx+POT_R*s)+' '+EY(POT_BOTTOM)+' '+(cx+POT_R*s)+' '+EY(POT_BOTTOM+POT_H)+'Z" fill="'+(h.p==='zygo'?'#a7b498':'#d8b48a')+'" stroke="#6b5a45" stroke-width="1"/>');
+    if(h.p==='hoya'){ [-8,0,8].forEach(function(d,j){ o.push('<path d="M'+(cx+d*s)+' '+EY(POT_BOTTOM+4)+' q'+(4*s)+' '+(14*s)+' '+(d*0.6*s)+' '+((34+j*10)*s)+'" fill="none" stroke="#3f6b35" stroke-width="2"/>'); }); o.push('<circle cx="'+(cx+3*s)+'" cy="'+EY(POT_BOTTOM-20)+'" r="4" fill="#f0bfcd"/>'); }
+    else { [-10,-4,4,10].forEach(function(d){ o.push('<path d="M'+cx+' '+EY(POT_BOTTOM+POT_H)+' q'+(d*1.4*s)+' '+(-6*s)+' '+(d*1.8*s)+' '+(10*s)+'" fill="none" stroke="#4f7a3a" stroke-width="2.4"/>'); o.push('<circle cx="'+(cx+d*1.8*s)+'" cy="'+(EY(POT_BOTTOM+POT_H)+10*s)+'" r="2.6" fill="#e0306f"/>'); }); }
+    if(!CO&&!NONAMES) o.push('<text x="'+cx+'" y="'+(EY(POT_BOTTOM)+(h.p==='hoya'?78:24))+'" text-anchor="middle" font-size="10" fill="#1f2a24">'+(h.p==='zygo'?'זיגוקקטוס':'בת שבע')+'</text>');
+  });
+  // woman 170 (in front of the wall, for scale)
+  (function(){ var wx=WOMAN.x, sil='#5b6a61';
+    function seg(x1,h1,x2,h2,w){ o.push('<line x1="'+X(wx+x1)+'" y1="'+EY(h1)+'" x2="'+X(wx+x2)+'" y2="'+EY(h2)+'" stroke="'+sil+'" stroke-opacity=".55" stroke-width="'+(w*s)+'" stroke-linecap="round"/>'); }
+    seg(-6,84,-5.5,6,9); seg(6,84,5.5,6,9); seg(-17,136,-19,84,5.5); seg(17,136,19,84,5.5);
+    o.push('<path d="M'+X(wx-15)+' '+EY(84)+' L'+X(wx-16.5)+' '+EY(92)+' L'+X(wx-12)+' '+EY(112)+' L'+X(wx-17)+' '+EY(136)+' Q'+X(wx)+' '+EY(146)+' '+X(wx+17)+' '+EY(136)+' L'+X(wx+12)+' '+EY(112)+' L'+X(wx+16.5)+' '+EY(92)+' L'+X(wx+15)+' '+EY(84)+'Z" fill="'+sil+'" fill-opacity=".55"/>');
+    seg(0,142,0,151,8);
+    o.push('<ellipse cx="'+X(wx)+'" cy="'+EY(160)+'" rx="'+(9.2*s)+'" ry="'+(10.2*s)+'" fill="'+sil+'" fill-opacity=".55"/>');
+  })();
+  // dims: segments chain
+  function hdim(x0,x1,y,label,fs){
+    o.push('<line x1="'+X(x0)+'" y1="'+y+'" x2="'+X(x1)+'" y2="'+y+'" stroke="#333" stroke-width="1" marker-start="url(#t)" marker-end="url(#t)"/>');
+    o.push('<text x="'+X((x0+x1)/2)+'" y="'+(y-5)+'" text-anchor="middle" font-size="'+(fs||12)+'" fill="#1f2a24">'+label+'</text>');
+  }
+  function vdim(x,h0,h1,label,side){
+    var px=X(x);
+    o.push('<line x1="'+px+'" y1="'+EY(h0)+'" x2="'+px+'" y2="'+EY(h1)+'" stroke="#333" stroke-width="1" marker-start="url(#t)" marker-end="url(#t)"/>');
+    o.push('<text x="'+(px+(side||-6))+'" y="'+(EY((h0+h1)/2)+4)+'" text-anchor="'+((side||-6)<0?'end':'start')+'" font-size="12" fill="#1f2a24">'+label+'</text>');
+  }
+  // callouts: label + leader line with arrow
+  function tw(t,fs){ return t.length*fs*0.58+14; }
+  function callouts(items,baseY,dir,fs){ // dir: +1 labels below target, -1 above
+    var rows=[-1e9,-1e9,-1e9];
+    items.forEach(function(it){
+      var w=tw(it.t,fs), l=X(it.x)-w/2, r=0; while(r<2 && l<rows[r]+6) r++;
+      rows[r]=X(it.x)+w/2;
+      var ly=baseY+dir*r*26, bx=X(it.x);
+      var y0=ly-dir*(fs*0.5+5);
+      (it.xs||[it.x]).forEach(function(tx){ o.push('<line x1="'+bx+'" y1="'+y0+'" x2="'+X(tx)+'" y2="'+it.y+'" stroke="#2f6b3a" stroke-width="1.3" marker-end="url(#ar)"/>'); });
+      o.push('<rect x="'+(bx-w/2)+'" y="'+(ly-fs*0.5-5)+'" width="'+w+'" height="'+(fs+10)+'" rx="6" fill="#fff" stroke="#2f6b3a" stroke-width="1.2"/>');
+      o.push('<text x="'+bx+'" y="'+(ly+fs*0.36)+'" text-anchor="middle" font-size="'+fs+'" font-weight="500" fill="#1f2a24" style="stroke:none" direction="rtl">'+it.t+'</text>');
+    });
+  }
+  if(CO&&!NONAMES){
+    callouts(P.map(function(x0,i){ return {x:x0+PL_L/2, y:EY(PL_H*0.55), t:(i+1)+'. '+combo(C[i])}; }), eBot+24, 1, 12);
+    callouts(HANG.map(function(h){ return {x:h.x, y:EY(POT_BOTTOM+POT_H)-2, t:(h.p==='zygo'?'זיגוקקטוס':'בת שבע')}; }), eTop-24, -1, 11);
+  }
+  if(!opt.mini){
+    // planter chain: gaps and planter widths along the wall (cm from the north end)
+    var yc=eBot+(CO?96:0)+26, prev=0; function r1(v){ return String(Math.round(v*10)/10); }
+    function pdim(a,b,lab,isP){ o.push('<line x1="'+X(a)+'" y1="'+yc+'" x2="'+X(b)+'" y2="'+yc+'" stroke="'+(isP?'#2f6b3a':'#888')+'" stroke-width="1" marker-start="url(#t)" marker-end="url(#t)"/>');
+      o.push('<text x="'+X((a+b)/2)+'" y="'+(yc-5)+'" text-anchor="middle" font-size="10" '+(isP?'font-weight="600" fill="#2f6b3a"':'fill="#6b746e"')+'>'+lab+'</text>'); }
+    P.forEach(function(x0){ if(x0-prev>0.5) pdim(prev,x0,r1(x0-prev)); pdim(x0,x0+PL_L,String(PL_L),1); prev=x0+PL_L; });
+    if(LEN-prev>0.5) pdim(prev,LEN,r1(LEN-prev));
+    o.push('<text x="'+(X(0)-8)+'" y="'+(yc+4)+'" text-anchor="end" font-size="10" fill="#2f6b3a">אדניות</text>');
+    // size of every planter (length × width × depth) and every hanging pot (diameter × depth)
+    P.forEach(function(x0){ o.push('<text x="'+X(x0+PL_L/2)+'" y="'+(EY(PL_H/2)+3)+'" text-anchor="middle" font-size="9" font-weight="600" fill="#1f2a24">'+PL_L+'×'+PL_D+'×'+PL_H+'</text>'); });
+    HANG.forEach(function(h){ o.push('<text x="'+X(h.x)+'" y="'+(EY(POT_BOTTOM+POT_H)-5)+'" text-anchor="middle" font-size="9" font-weight="600" fill="#1f2a24">Ø'+(POT_R*2)+'×'+POT_H+'</text>'); });
+  }
+  SEG.forEach(function(sg){ hdim(sg.x0,sg.x1,eBot+28+cb,sg.w+' '+NAMES[sg.t]); });
+  hdim(0,LEN,eBot+58+cb,LEN+' סה״כ',13);
+  vdim(-14,0,SILL,'127 אדן');
+  vdim(-14,SILL,H,'147 פתח');
+  vdim(-48,0,H,'274 תקרה');
+  vdim(HANG[0].x-POT_R-10,0,POT_BOTTOM,'220 תחתית עציץ',6);
+  if(opt.mini){ o.push('</svg>'); return fin(); }
+  // plan
+  o.push('<text x="'+X(LEN/2)+'" y="'+(pTop-26)+'" text-anchor="middle" font-size="16" font-weight="700" fill="#1f2a24">מבט מלמעלה</text>');
+  o.push('<rect x="'+X(0)+'" y="'+PY(W)+'" width="'+LEN*s+'" height="'+W*s+'" fill="#f4f1ea" stroke="none"/>');
+  // sunny zone (impression on site, not measured)
+  o.push('<rect x="'+X(SUN.x0)+'" y="'+PY(W)+'" width="'+(SUN.x1-SUN.x0)*s+'" height="'+W*s+'" fill="#ffd84d" fill-opacity=".32"/>');
+  o.push('<text x="'+X((SUN.x0+SUN.x1)/2)+'" y="'+(PY(55)+4)+'" text-anchor="middle" font-size="11" fill="#8a5a00" direction="rtl">☀ אזור שמשי</text>');
+  // west wall with the glass-door recess (300 × 20, 35 from the south end)
+  var RX0=135, RX1=435;
+  o.push('<rect x="'+X(0)+'" y="'+PY(0)+'" width="'+RX0*s+'" height="'+T*s+'" fill="#9a958c"/>');
+  o.push('<rect x="'+X(RX1)+'" y="'+PY(0)+'" width="'+(LEN-RX1)*s+'" height="'+T*s+'" fill="#9a958c"/>');
+  o.push('<rect x="'+X(RX0)+'" y="'+PY(0)+'" width="'+(RX1-RX0)*s+'" height="'+20*s+'" fill="#f4f1ea"/>');
+  o.push('<rect x="'+X(RX0)+'" y="'+PY(-20)+'" width="'+(RX1-RX0)*s+'" height="'+T*s+'" fill="#9a958c"/>');
+  o.push('<line x1="'+X(RX0+2)+'" y1="'+(PY(-20)+2)+'" x2="'+X(RX1-2)+'" y2="'+(PY(-20)+2)+'" stroke="#5aa0c8" stroke-width="3"/>');
+  o.push('<text x="'+X(650)+'" y="'+(PY(-T)+16)+'" text-anchor="middle" font-size="11" fill="#5b6a61">קיר מערבי</text>');
+  o.push('<text x="'+X((RX0+RX1)/2)+'" y="'+(PY(-40)+15)+'" text-anchor="middle" font-size="11" fill="#2f6b3a" direction="rtl">דלת הזזה מזכוכית · שקע 300 × 20</text>');
+  hdim(100,RX0,PY(-40)+15,'35',10);
+  // both ends are open (no end walls)
+  SEG.forEach(function(sg){
+    if(sg.t==='win') o.push('<rect x="'+X(sg.x0)+'" y="'+PY(W+T)+'" width="'+sg.w*s+'" height="'+T*s+'" fill="url(#bb)" stroke="#8a948e" stroke-width=".8"/>');
+    else o.push('<rect x="'+X(sg.x0)+'" y="'+PY(W+T)+'" width="'+sg.w*s+'" height="'+T*s+'" fill="#9a958c"/>');
+  });
+  o.push('<text x="'+X(LEN/2)+'" y="'+(PY(W+T)-6)+'" text-anchor="middle" font-size="11" fill="#5b6a61">קיר מזרחי</text>');
+  P.forEach(function(x0,i){
+    o.push('<rect x="'+X(x0)+'" y="'+PY(PL_Z0+PL_D)+'" width="'+PL_L*s+'" height="'+PL_D*s+'" fill="#fff" stroke="#4f7a3f" stroke-width="1.2"/>');
+    o.push('<text x="'+X(x0+PL_L/2)+'" y="'+(PY(PL_Z0+PL_D/2)+4)+'" text-anchor="middle" font-size="10" fill="#1f2a24">'+(i+1)+'</text>');
+    o.push('<text x="'+X(x0+PL_L/2)+'" y="'+(PY(PL_Z0)+12)+'" text-anchor="middle" font-size="9" fill="#2f6b3a" font-weight="600">'+PL_L+'×'+PL_D+'</text>');
+  });
+  HANG.forEach(function(h){ o.push('<circle cx="'+X(h.x)+'" cy="'+PY(POT_Z)+'" r="'+POT_R*s+'" fill="none" stroke="'+(h.p==='zygo'?'#c0306a':'#b07a3a')+'" stroke-width="1.2" stroke-dasharray="4 3"/>'); });
+  o.push('<ellipse cx="'+X(WOMAN.x)+'" cy="'+PY(WOMAN.z)+'" rx="'+(20*s)+'" ry="'+(12*s)+'" fill="#5b6a61" fill-opacity=".35"/><circle cx="'+X(WOMAN.x)+'" cy="'+PY(WOMAN.z+1)+'" r="'+(9*s)+'" fill="#5b6a61" fill-opacity=".55"/>');
+  // cabinet against the west wall, behind the woman
+  o.push('<rect x="'+X(CAB.x0)+'" y="'+PY(CAB.d)+'" width="'+CAB.l*s+'" height="'+CAB.d*s+'" fill="#e6d3b8" stroke="#8a6a45" stroke-width="1.2"/>');
+  o.push('<line x1="'+X(CAB.x0+CAB.l/2)+'" y1="'+PY(CAB.d)+'" x2="'+X(CAB.x0+CAB.l/2)+'" y2="'+PY(0)+'" stroke="#8a6a45" stroke-width=".8"/>');
+  o.push('<text x="'+X(CAB.x0+CAB.l/2)+'" y="'+(PY(CAB.d/2)+4)+'" text-anchor="middle" font-size="10" fill="#1f2a24" direction="rtl">ארונית, גובה '+CAB.h+'</text>');
+  hdim(CAB.x0,CAB.x0+CAB.l,PY(-T)+40,String(CAB.l),11);
+  (function(){ var cx=X(CAB.x0+CAB.l)+8; o.push('<line x1="'+cx+'" y1="'+PY(CAB.d)+'" x2="'+cx+'" y2="'+PY(0)+'" stroke="#333" stroke-width="1" marker-start="url(#t)" marker-end="url(#t)"/>');
+    o.push('<text x="'+(cx+5)+'" y="'+(PY(CAB.d/2)+4)+'" font-size="11" text-anchor="start" fill="#1f2a24">'+CAB.d+'</text>'); })();
+  hdim(CAB.x0+CAB.l,ACU.x0,PY(CAB.d+12),String(ACU.x0-CAB.x0-CAB.l),10);
+  // AC outdoor unit on the floor, back to the window-153 end, fan facing into the balcony
+  o.push('<rect x="'+X(ACU.x0)+'" y="'+PY(ACU.z0+ACU.w)+'" width="'+ACU.d*s+'" height="'+ACU.w*s+'" fill="#e4e7e8" stroke="#5b6266" stroke-width="1.2"/>');
+  o.push('<line x1="'+(X(ACU.x0)+2)+'" y1="'+PY(ACU.z0+ACU.w*0.7)+'" x2="'+(X(ACU.x0)+2)+'" y2="'+PY(ACU.z0+ACU.w*0.2)+'" stroke="#5b6266" stroke-width="2.5"/>');
+  o.push('<text x="'+X(ACU.x0+ACU.d/2)+'" y="'+(PY(ACU.z0+ACU.w/2)+4)+'" text-anchor="middle" font-size="10" fill="#1f2a24">מזגן</text>');
+  o.push('<text x="'+X(ACU.x0+ACU.d)+'" y="'+(PY(ACU.z0+ACU.w)-6)+'" text-anchor="start" font-size="10" fill="#1f2a24" direction="rtl">'+ACU.w+'×'+ACU.d+', גובה '+ACU.h+'</text>');
+  // width dim
+  var wx=X(LEN)+22;
+  o.push('<line x1="'+wx+'" y1="'+PY(W)+'" x2="'+wx+'" y2="'+PY(0)+'" stroke="#333" stroke-width="1" marker-start="url(#t)" marker-end="url(#t)"/>');
+  o.push('<text x="'+(wx+6)+'" y="'+(PY(W/2)+4)+'" font-size="12" text-anchor="start" fill="#1f2a24">145</text>');
+  o.push('<text x="'+(wx+6)+'" y="'+(PY(W+T/2)+4)+'" font-size="11" text-anchor="start" fill="#5b6a61">20</text>');
+  // legend
+  var ly=pBot+72;
+  o.push('<rect x="'+X(0)+'" y="'+(ly-10)+'" width="14" height="10" fill="#fff" stroke="#4f7a3f"/><text x="'+(X(0)+20)+'" y="'+ly+'" font-size="12" text-anchor="start" fill="#1f2a24">אדנית '+PL_L+'×'+PL_D+'×'+PL_H+' על הרצפה</text>');
+  o.push('<circle cx="'+(X(260)+7)+'" cy="'+(ly-5)+'" r="6" fill="none" stroke="#c0306a" stroke-dasharray="3 2"/><text x="'+(X(260)+20)+'" y="'+ly+'" font-size="12" text-anchor="start" fill="#1f2a24">עציץ תלוי Ø25×20, ב־220</text>');
+  o.push('<circle cx="'+(X(500)+7)+'" cy="'+(ly-5)+'" r="6" fill="none" stroke="#b07a3a" stroke-dasharray="3 2"/><text x="'+(X(500)+20)+'" y="'+ly+'" font-size="12" text-anchor="start" fill="#1f2a24">עציץ תלוי Ø25×20, ב־220</text>');
+  o.push('<rect x="'+X(720)+'" y="'+(ly-10)+'" width="20" height="10" fill="url(#bb)" stroke="#8a948e"/><text x="'+(X(720)+26)+'" y="'+ly+'" font-size="12" text-anchor="start" fill="#1f2a24">בלוקים מעוטרים</text>');
+  o.push('</svg>');
+  return fin();
+}
+function drawSVG(){
+  document.getElementById('svgwrap').innerHTML=svgFor(PLANTERS,choice);
+  document.getElementById('cmpwrap').innerHTML=VARIANTS.map(function(v,i){
+    return '<div class="cmp"><button type="button" data-var="'+i+'" aria-pressed="'+(i===V)+'">'+(i+1)+'. '+v.n+'</button><p class="note">'+v.d+'</p><div class="svgwrap">'+(function(){ var k=PL_L; PL_L=LEN_OF(i); var r=svgFor(v.x,variantChoice(i),{mini:true,pot:v.pot,title:(i+1)+'. '+v.n}); PL_L=k; return r; })()+'</div></div>';
+  }).join('');
+}
+(function(){ var bs=['irrBtn','irrBtn2'].map(function(id){ return document.getElementById(id); }).filter(Boolean);
+  bs.forEach(function(b){ b.addEventListener('click',function(){ window.__irr=!window.__irr; bs.forEach(function(x){ x.setAttribute('aria-pressed',window.__irr?'true':'false'); }); renderBOM(); }); }); bs.forEach(function(x){ x.setAttribute('aria-pressed',window.__irr?'true':'false'); }); })();
+(function(){ var b=document.getElementById('saveBtn'); if(!b) return;
+  b.addEventListener('click',function(){ saveChoice();
+    var snap={v:V,c:store.c,pos:{p:VARIANTS.map(function(v){ return v.x.slice(); }),h:HANG.map(function(h){ return h.x; }),cab:CAB.x0,ac:[ACU.x0,ACU.z0],woman:[WOMAN.x,WOMAN.z]},hid:(window.__hiddenList?window.__hiddenList():[]).map(function(it){ return it.id; }),irr:!!window.__irr,t:Date.now()};
+    var ok=true; try{ localStorage.setItem('danaBalconySaved',JSON.stringify(snap)); }catch(e){ ok=false; }
+    b.textContent=ok?'✓ נשמר':'השמירה נכשלה'; setTimeout(function(){ b.textContent='💾 שמירה'; },1800); }); })();
+renderBOM(); drawSVG(); setSub();
+(function(){ var sel=document.getElementById('varSel'); VARIANTS.forEach(function(v,i){ var o=document.createElement('option'); o.value=String(i); o.textContent=(i+1)+'. '+v.n; sel.appendChild(o); }); sel.value=String(V);
+  sel.addEventListener('change',function(){ setVariant(+sel.value); });
+  document.getElementById('cmpwrap').addEventListener('click',function(e){ var b=e.target.closest('[data-var]'); if(b) setVariant(+b.dataset.var); });
+})();
 
 // ---------- sheet ----------
 var sheet=document.getElementById('sheet');
@@ -192,12 +431,16 @@ document.getElementById('sheetClose').addEventListener('click',closeSheet);
 function openPlanter(i){
   document.getElementById('sheetTitle').textContent='אדנית '+(i+1)+' · '+where(i)+' · '+PL_L+'×'+PL_D+'×'+PL_H;
   var c=choice[i];
-  document.getElementById('sheetText').textContent='כרגע: '+FLOOR[c[0]].n+' – '+FLOOR[c[0]].why+'. בוחרים צמח:';
+  document.getElementById('sheetText').textContent=c.length>1?('כרגע: '+c.map(function(k){ return FLOOR[k].n; }).join(' + ')+'. בוחרים צמח לכל צד:'):('כרגע: '+FLOOR[c[0]].n+' – '+FLOOR[c[0]].why+'. בוחרים צמח:');
   var box=document.getElementById('sheetOpts'); box.innerHTML='';
   c.forEach(function(cur,slot){
+    var sh=document.createElement('div'); sh.className='slotH'; var st=document.createElement('span'); st.textContent=(c.length>1?(slot?'צמח צפוני':'צמח דרומי')+' · ':'')+SHORT[cur]; sh.appendChild(st);
+    if(cur!=='none'){ var ib=document.createElement('button'); ib.type='button'; ib.className='infobtn'; ib.textContent='הצג פרטים על הצמח הנבחר'; ib.addEventListener('click',function(){ openPlant(cur,'p'+i); }); sh.appendChild(ib);
+      var xb=document.createElement('button'); xb.type='button'; xb.className='hidebtn'; xb.textContent='הסתר צמח'; xb.addEventListener('click',function(){ setChoice(i,slot,'none'); openPlanter(i); }); sh.appendChild(xb); }
+    box.appendChild(sh);
     
     Object.keys(FLOOR).forEach(function(k){
-      var b=document.createElement('button'); b.type='button'; b.textContent=SHORT[k]+' · '+FLOOR[k].s+'/10';
+      var b=document.createElement('button'); b.type='button'; b.textContent=k==='none'?'בלי צמח':SHORT[k]+' · '+FLOOR[k].s+'/10';
       b.setAttribute('aria-pressed', k===cur?'true':'false');
       b.addEventListener('click',function(){ setChoice(i,slot,k); openPlanter(i); });
       box.appendChild(b);
@@ -209,19 +452,32 @@ function openPlanter(i){
 function openHang(h){
   var z=h.p==='zygo';
   document.getElementById('sheetTitle').textContent=(z?'זיגוקקטוס':'בת שבע (הויה)')+' · עציץ תלוי';
-  document.getElementById('sheetText').textContent=(z?'קערה 15. 9/10 למרפסת. ':'כ־6/10 (הערכה): תגדל, הפריחה לא בטוחה באור צדדי. ')+'עציץ דמוי ראטן Ø25, עומק 20. תחתית ב־220.';
-  document.getElementById('sheetOpts').innerHTML='';
+  document.getElementById('sheetText').textContent=(z?'9/10 למרפסת. ':'מחיר לא ידוע. כ־6/10 (הערכה): תגדל, הפריחה לא בטוחה באור צדדי. ')+'עציץ דמוי ראטן Ø25, עומק 20. תחתית ב־220.';
+  var hb=document.getElementById('sheetOpts'); hb.innerHTML='';
+  var ib=document.createElement('button'); ib.type='button'; ib.className='infobtn'; ib.textContent='הצג פרטים על הצמח הנבחר'; ib.addEventListener('click',function(){ openPlant(h.p,'h'+HANG.indexOf(h)); }); hb.appendChild(ib);
   addHideBtn('h'+HANG.indexOf(h));
   sheet.hidden=false; document.body.classList.add('sheetOpen');
 }
+// ---------- plant page: photo + details ----------
+function openPlant(k,id){
+  var f=FLOOR[k]||{}, p=PINFO[k]||{}, li=(window.__lightInfo||{})[id], name=f.n||p.n||k;
+  var s=f.s||p.s, price=(f.price!=null?f.price:p.price), src=f.src||p.src||'תווית', size=f.size||p.size, why=f.why||p.why||'';
+  function r1(x){ return String(Math.round(x*10)/10); }
+  var lt=(li && !isNaN(li.lo))?((li.tag?r1(li.lo)+' בגובה 40 ס״מ, '+r1(li.hi)+' בגובה 115 ס״מ':r1(li.lo))+' מול ליום · שמש ישירה '+r1(li.d)+' ש׳ · '+li.date+' (הערכה)'):'';
+  var rows=[['שם מדעי',p.lat],['ציון למרפסת',s?s+'/10':''],['מחיר',price!=null?fmt(price)+' · '+src:'לא ידוע'],['גודל במשתלה',size],['פריחה',p.fl],['אור שהוא צריך',p.need?p.need+' מול ליום (כללי)':''],['אור במקום הזה',lt],['השקיה',p.w],['גובה בוגר',p.h],['קור',p.c],['חיות מחמד',p.pet]];
+  var wh=li?li.name+(li.w?' · '+li.w:''):'';
+  document.getElementById('plantBody').innerHTML=(p.img?'<img class="phero" src="'+p.img+'" alt="'+name+'">':'<div class="phero noimg">אין תמונה בקטלוג</div>')+(p.cr?'<p class="pcr">'+p.cr+'</p>':'')+'<h2>'+name+'</h2>'+(wh?'<p class="note">'+wh+'</p>':'')+'<p class="note">'+why+'</p><table>'+rows.filter(function(r){ return r[1]; }).map(function(r){ return '<tr><th>'+r[0]+'</th><td>'+r[1]+'</td></tr>'; }).join('')+'</table><p class="note" style="margin-top:.8rem">מקורות: קטלוג משתלות אייל וידע גננות כללי. ״הערכה״ – ההערכה שלי.</p>';
+  closeSheet(); var pp=document.getElementById('pane-plant'); pp.hidden=false; pp.scrollTop=0; document.body.classList.add('paneOpen');
+}
+document.getElementById('plantBack').addEventListener('click',function(){ document.getElementById('pane-plant').hidden=true; var m=document.querySelector('[data-tab=model]'); if(m && m.getAttribute('aria-selected')==='true') document.body.classList.remove('paneOpen'); });
 // ---------- hide / restore (costs version only) ----------
 function addHideBtn(id){
   if(!EDITOR || !window.__hide) return;
-  var b=document.createElement('button'); b.type='button'; b.textContent='הסתרה'; b.className='hidebtn';
+  var b=document.createElement('button'); b.type='button'; b.textContent=/^[ph]\d/.test(id)?'הסתר עציץ':'הסתרה'; b.className='hidebtn';
   b.addEventListener('click',function(){ window.__hide(id); closeSheet(); });
   var box=document.getElementById('sheetOpts'); box.insertBefore(b,box.firstChild);
 }
-var ITEM_TEXT={cab:'100 × 30, גובה 170. על הקיר המערבי.', ac:'מנוע מזגן 80 × 30, גובה 55. על הרצפה בפינה עם הקיר המערבי.', woman:'דמות בגובה 170, לקנה מידה.'};
+var ITEM_TEXT={cab:'90 × 47, גובה 170 (הנחה). על הקיר המערבי, צמודה מצפון לשקע של דלת הזכוכית.', ac:'מנוע מזגן 80 × 30, גובה 55. על הרצפה בפינה עם הקיר המערבי.', woman:'דמות בגובה 170, לקנה מידה.'};
 function openItem(id){
   var names={cab:'ארונית',ac:'מזגן',woman:'הדמות'};
   document.getElementById('sheetTitle').textContent=names[id]||id;
@@ -247,7 +503,97 @@ function openHidden(){
     b.addEventListener('click',function(){ window.__hide(it.id,false); openHidden(); }); box.appendChild(b); });
   sheet.hidden=false; document.body.classList.add('sheetOpen');
 }
+document.getElementById('hiddenBtn').addEventListener('click',openHidden);
 
+// Daily light estimate for the balcony: direct sun + sky diffuse + light through breeze blocks + interreflection (radiosity-lite).
+// World: x = north (0 = south end), y = up, z = east (0 = west wall face, W = inner face of the east wall).
+// Returns DLI (mol/m2/day, PAR) for given points, plus a floor-plane grid.
+function lightModel(cfg){
+  var rad=Math.PI/180, LAT=cfg.lat, LON=cfg.lon, LEN=cfg.LEN, W=cfg.W, T=cfg.T, H=cfg.H, SILL=cfg.SILL;
+  var RHO=cfg.rho; // {floor, wall, ceil, glass, out}
+  var P0=cfg.porosity, HOLE=cfg.holeRatio; // breeze: open fraction at normal incidence; depth/hole-size ratio for oblique cut-off
+  // ---------- surfaces (rectangles), normal points into the balcony ----------
+  var R=[];
+  function rect(ax,c,a0,a1,b0,b1,n,rho,breeze){ R.push({ax:ax,c:c,a0:a0,a1:a1,b0:b0,b1:b1,n:n,rho:rho,br:!!breeze}); }
+  // ax 'y': a=x, b=z ; ax 'z': a=x, b=y ; ax 'x': a=z, b=y
+  rect('y',0,0,LEN,0,W,1,RHO.floor);
+  rect('y',H,0,LEN,-cfg.recess.d,W+T,-1,RHO.ceil);
+  var rc=cfg.recess;
+  if(rc){
+    rect('y',0,rc.x0,rc.x1,-rc.d,0,1,RHO.floor);
+    rect('z',0,0,rc.x0,0,H,1,RHO.wall); rect('z',0,rc.x1,LEN,0,H,1,RHO.wall);
+    rect('z',-rc.d,rc.x0,rc.x1,0,rc.door,1,RHO.glass); rect('z',-rc.d,rc.x0,rc.x1,rc.door,H,1,RHO.wall);
+    rect('x',rc.x0,-rc.d,0,0,H,1,RHO.wall); rect('x',rc.x1,-rc.d,0,0,H,-1,RHO.wall);
+  } else rect('z',0,0,LEN,0,H,1,RHO.wall);
+  cfg.seg.forEach(function(sg,i){
+    if(sg.t==='win'){ rect('z',W,sg.x0,sg.x1,0,SILL,-1,RHO.wall,true); rect('y',SILL,sg.x0,sg.x1,W,W+T,1,RHO.wall); }
+    else {
+      rect('z',W,sg.x0,sg.x1,0,H,-1,RHO.wall);
+      if(i>0) rect('x',sg.x0,W,W+T,0,H,-1,RHO.wall);
+      if(i<cfg.seg.length-1) rect('x',sg.x1,W,W+T,0,H,1,RHO.wall);
+    }
+  });
+  var AX={x:0,y:1,z:2}, UA={y:0,z:0,x:2}, UB={y:2,z:1,x:1};
+  R.forEach(function(r){ r.i=AX[r.ax]; r.ia=UA[r.ax]; r.ib=UB[r.ax]; });
+  // ---------- patches ----------
+  var PS=cfg.patch||30, PAT=[];
+  R.forEach(function(r,ri){ var na=Math.max(1,Math.round((r.a1-r.a0)/PS)), nb=Math.max(1,Math.round((r.b1-r.b0)/PS)); r.na=na; r.nb=nb; r.p0=PAT.length;
+    for(var j=0;j<nb;j++) for(var i=0;i<na;i++){ var p=[0,0,0]; p[r.i]=r.c; p[r.ia]=r.a0+(i+.5)*(r.a1-r.a0)/na; p[r.ib]=r.b0+(j+.5)*(r.b1-r.b0)/nb; var nv=[0,0,0]; nv[r.i]=r.n;
+      PAT.push({p:p,n:nv,rho:r.rho*(r.br?(1-P0):1),r:ri}); } });
+  // ---------- ray casting ----------
+  function cast(o,d){ var best=1e12, hit=-1; for(var k=0;k<R.length;k++){ var r=R[k], dd=d[r.i]; if(dd===0) continue; var t=(r.c-o[r.i])/dd; if(t<=1e-4||t>=best) continue;
+      var a=o[r.ia]+d[r.ia]*t, b=o[r.ib]+d[r.ib]*t; if(a<r.a0||a>r.a1||b<r.b0||b>r.b1) continue; best=t; hit=k; }
+    if(hit<0) return null; var r=R[hit], t=best, a=o[r.ia]+d[r.ia]*t, b=o[r.ib]+d[r.ib]*t;
+    var i=Math.min(r.na-1,Math.max(0,Math.floor((a-r.a0)/(r.a1-r.a0)*r.na))), j=Math.min(r.nb-1,Math.max(0,Math.floor((b-r.b0)/(r.b1-r.b0)*r.nb)));
+    return {r:hit,patch:r.p0+j*r.na+i}; }
+  function trans(d){ var c=Math.abs(d[2]); if(c<1e-6) return 0; var tn=Math.sqrt(Math.max(0,1-c*c))/c; return P0*Math.max(0,1-HOLE*tn); } // breeze transmission
+  // outcome of a ray: list of [kind, weight, patch]: kind 0 sky, 1 ground (outside, below horizon), 2 patch
+  function trace(o,d){ var h=cast(o,d); if(!h) return [[d[1]>0?0:1,1,-1]]; var r=R[h.r];
+    if(r.br && d[2]>0){ var tr=trans(d); var out=[[2,1,h.patch]]; if(tr>0) out.push([d[1]>0?0:1,tr,-1]); return out; } // patch exitance already counts (1-P0); add what passes
+    return [[2,1,h.patch]]; }
+  // cosine-weighted hemisphere directions around normal n (stratified)
+  function hemi(n,N){ var out=[], s=Math.ceil(Math.sqrt(N)), t1=[0,0,0], t2=[0,0,0];
+    if(Math.abs(n[1])>0.5){ t1=[1,0,0]; t2=[0,0,1]; } else if(Math.abs(n[0])>0.5){ t1=[0,1,0]; t2=[0,0,1]; } else { t1=[1,0,0]; t2=[0,1,0]; }
+    for(var i=0;i<s;i++) for(var j=0;j<s;j++){ var u=(i+((i*7+j*13)%10+.5)/10)/s, v=(j+((i*3+j*11)%10+.5)/10)/s, r=Math.sqrt(u), ph=2*Math.PI*v, x=r*Math.cos(ph), y=r*Math.sin(ph), z=Math.sqrt(Math.max(0,1-u));
+      out.push([t1[0]*x+t2[0]*y+n[0]*z, t1[1]*x+t2[1]*y+n[1]*z, t1[2]*x+t2[2]*y+n[2]*z]); }
+    return out; }
+  function gather(o,n,N){ var dirs=hemi(n,N), sky=0, gnd=0, F={}; dirs.forEach(function(d){ trace(o,d).forEach(function(e){ if(e[0]===0) sky+=e[1]; else if(e[0]===1) gnd+=e[1]; else F[e[2]]=(F[e[2]]||0)+e[1]; }); });
+    var k=1/dirs.length, list=[]; for(var q in F) list.push(+q,F[q]*k); return {sky:sky*k,gnd:gnd*k,F:list}; }
+  // ---------- sun ----------
+  function sunAt(ms){ var d=(ms-Date.UTC(2000,0,1,12))/864e5, g=((357.529+0.98560028*d)%360)*rad, q=280.459+0.98564736*d;
+    var Ls=((q+1.915*Math.sin(g)+0.02*Math.sin(2*g))%360)*rad, e=(23.439-0.00000036*d)*rad, ra=Math.atan2(Math.cos(e)*Math.sin(Ls),Math.cos(Ls)), dec=Math.asin(Math.sin(e)*Math.sin(Ls));
+    var gmst=((18.697374558+24.06570982441908*d)%24+24)%24, Hh=(gmst*15+LON)*rad-ra, ph=LAT*rad;
+    var el=Math.asin(Math.sin(ph)*Math.sin(dec)+Math.cos(ph)*Math.cos(dec)*Math.cos(Hh)), az=Math.atan2(-Math.sin(Hh),Math.tan(dec)*Math.cos(ph)-Math.sin(ph)*Math.cos(Hh));
+    return {el:el/rad,az:((az/rad)%360+360)%360}; }
+  function dirOf(s){ var e=s.el*rad,a=s.az*rad; return [Math.cos(e)*Math.cos(a),Math.sin(e),Math.cos(e)*Math.sin(a)]; }
+  // clear sky (Meinel beam + ASHRAE diffuse ratio by month)
+  var CD=[.058,.060,.071,.097,.121,.134,.136,.122,.092,.073,.063,.057];
+  function clearSky(el,month){ if(el<=0) return {dni:0,dhi:0,ghi:0}; var am=1/(Math.sin(el*rad)+0.50572*Math.pow(el+6.07995,-1.6364));
+    var dni=1353*Math.pow(0.7,Math.pow(am,0.678)), dhi=Math.max(CD[month]*dni*cfg.diffuseBoost, 0); return {dni:dni,dhi:dhi,ghi:dni*Math.sin(el*rad)+dhi}; }
+  function vis(o,d){ var h=cast(o,d); if(!h) return 1; var r=R[h.r]; if(r.br && d[2]>0) return trans(d); return 0; }
+  // ---------- precompute geometry factors ----------
+  var NP=cfg.patchRays||100;
+  PAT.forEach(function(p){ var o=[p.p[0]+p.n[0]*0.5,p.p[1]+p.n[1]*0.5,p.p[2]+p.n[2]*0.5]; p.o=o; var g=gather(o,p.n,NP); p.sky=g.sky; p.gnd=g.gnd; p.F=g.F; });
+  function prepPoint(pt,N){ var o=pt.p, g=gather(o,[0,1,0],N||cfg.pointRays||900); return {o:o,sky:g.sky,gnd:g.gnd,F:g.F}; }
+  // ---------- one day ----------
+  function day(ds,points,grid){
+    var pr=ds.split('-').map(Number), y=pr[0], m=pr[1], dd=pr[2];
+    function ls(mo){ var t=new Date(Date.UTC(y,mo,0)); return t.getUTCDate()-t.getUTCDay(); } var key=m*100+dd, off=(key>=300+ls(3)-2&&key<1000+ls(10))?3:2;
+    var step=cfg.stepH||0.25, np=PAT.length, E=new Float64Array(np), B=new Float64Array(np), E0=new Float64Array(np);
+    var tot=points.map(function(){ return {e:0,dir:0}; }), gtot=grid?grid.map(function(){ return 0; }):null, open=0;
+    for(var h=4;h<20;h+=step){ var s=sunAt(Date.UTC(y,m-1,dd)+(h+step/2-off)*36e5); if(s.el<=0) continue; var cs=clearSky(s.el,m-1), sd=dirOf(s);
+      open+=cs.ghi*step*3600;
+      for(var i=0;i<np;i++){ var p=PAT[i], c=p.n[0]*sd[0]+p.n[1]*sd[1]+p.n[2]*sd[2]; E0[i]=(c>0?cs.dni*c*vis(p.o,sd):0)+cs.dhi*p.sky+cs.ghi*RHO.out*p.gnd; E[i]=E0[i]; B[i]=0; }
+      for(var it=0;it<cfg.bounces;it++){ for(var i=0;i<np;i++) B[i]=PAT[i].rho*E[i]; for(var i=0;i<np;i++){ var F=PAT[i].F, e=E0[i]; for(var k=0;k<F.length;k+=2) e+=F[k+1]*B[F[k]]; E[i]=e; } }
+      for(var i=0;i<np;i++) B[i]=PAT[i].rho*E[i];
+      points.forEach(function(x,j){ var d=cs.dni*Math.max(0,sd[1])*vis(x.o,sd); var e=d+cs.dhi*x.sky+cs.ghi*RHO.out*x.gnd, F=x.F; for(var k=0;k<F.length;k+=2) e+=F[k+1]*B[F[k]]; tot[j].e+=e*step*3600; tot[j].dir+=d*step*3600; });
+      if(grid) grid.forEach(function(x,j){ var e=cs.dni*Math.max(0,sd[1])*vis(x.o,sd)+cs.dhi*x.sky+cs.ghi*RHO.out*x.gnd, F=x.F; for(var k=0;k<F.length;k+=2) e+=F[k+1]*B[F[k]]; gtot[j]+=e*step*3600; });
+    }
+    var toDLI=function(J){ return J*cfg.parPerW/1e6; }; // J/m2 shortwave -> mol/m2 PAR
+    return {pts:tot.map(function(t){ return {dli:toDLI(t.e),direct:toDLI(t.dir)}; }), grid:gtot?gtot.map(toDLI):null, open:toDLI(open)};
+  }
+  return {prepPoint:prepPoint,day:day,patches:PAT.length};
+}
 
 // ---------- 3D ----------
 (function(){
@@ -268,7 +614,7 @@ function openHidden(){
   controls.enableDamping=true; controls.dampingFactor=0.08;
   controls.maxPolarAngle=Math.PI*0.495; controls.minDistance=30; controls.maxDistance=3000;
 
-  scene.add(new THREE.HemisphereLight(0xffffff,0x8a8f86,0.8));
+  var hemi=new THREE.HemisphereLight(0xffffff,0x8a8f86,0.8); scene.add(hemi);
   var sun=new THREE.DirectionalLight(0xfff4e0,0.6); sun.position.set(300,500,1200); scene.add(sun); // from the east (+z), morning
   var fill=new THREE.DirectionalLight(0xffffff,0.3); fill.position.set(-400,400,-600); scene.add(fill);
 
@@ -303,8 +649,17 @@ function openHidden(){
 
   // floor slab
   box(L.room,M.floor,0,-8,0,LEN,8,W);
-  // west wall (full, assumption)
-  box(L.west,M.plaster,0,0,-T,LEN,H,T);
+  // west wall: full except a 300-long, 20-deep recess with a glass sliding door, 35 from the south end
+  var RC={x0:135,x1:435,d:20,door:220};
+  box(L.west,M.plaster,0,0,-T,RC.x0,H,T);
+  box(L.west,M.plaster,RC.x1,0,-T,LEN-RC.x1,H,T);
+  box(L.west,M.plaster,RC.x0,RC.door,-RC.d-T,RC.x1-RC.x0,H-RC.door,T);
+  box(L.room,M.floor,RC.x0,-8,-RC.d,RC.x1-RC.x0,8,RC.d);
+  (function(){ var gm=new THREE.MeshLambertMaterial({color:0xbfe0ee,transparent:true,opacity:0.35,depthWrite:false}), zc=-RC.d-T/2;
+    box(L.west,gm,RC.x0,0,zc-1,RC.x1-RC.x0,RC.door,2);
+    [RC.x0,(RC.x0+RC.x1)/2-2,RC.x1-4].forEach(function(x){ box(L.west,M.steel,x,0,zc-2,4,RC.door,4); });
+    box(L.west,M.steel,RC.x0,RC.door-4,zc-2,RC.x1-RC.x0,4,4); box(L.west,M.steel,RC.x0,0,zc-2,RC.x1-RC.x0,3,4); })();
+  // both ends are open (no end walls); the south opening (100) is part of the east wall, in SEG
   // east wall
   SEG.forEach(function(sg){
     if(sg.t==='win'){
@@ -323,6 +678,11 @@ function openHidden(){
   var edges=new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(LEN,0.1,W+2*T)),new THREE.LineBasicMaterial({color:0x8a948e}));
   edges.position.set(LEN/2,H,W/2); L.room.add(edges);
   L.ceil.visible=false;
+  // sunny zone: from window 153 to the south end (impression, not measured)
+  L.sun=new THREE.Group(); scene.add(L.sun); L.sun.visible=false;
+  (function(){ var sm=new THREE.Mesh(new THREE.PlaneGeometry(SUN.x1-SUN.x0,W),new THREE.MeshBasicMaterial({color:0xffd84d,transparent:true,opacity:0.32,depthWrite:false}));
+    sm.rotation.x=-Math.PI/2; sm.position.set((SUN.x0+SUN.x1)/2,0.4,W/2); L.sun.add(sm);
+    label('☀ אזור שמשי · התרשמות',(SUN.x0+SUN.x1)/2,6,W/2-10,9,L.sun); })();
 
   // ---------- plant parts ----------
   var geoCache={};
@@ -370,6 +730,8 @@ function openHidden(){
       return g; },
     trach:function(){ return climber(5,2.4,0x2d5a27,0xfdfdf8,0.75,9); },
     stephan:function(){ return climber(8,4,0x2f5f2a,0xf7f5ee,1.0,6); },
+    dipla:function(){ return climber(7,3.6,0x2d5a27,0xe8508a,1.6,9); },
+    none:function(){ return new THREE.Group(); },
     taberna:function(){ var g=new THREE.Group();
       for(var s2=0;s2<4;s2++){ var c=cyl(0.7,R(40,60),0x5b4a3a); c.rotation.x=R(-0.25,0.25); c.rotation.z=R(-0.25,0.25); g.add(c); }
       for(var i=0;i<60;i++){ var h=R(20,68), r=R(3,16)*(1-Math.abs(h-44)/70), a=R(0,6.28); g.add(tilted(leaf(R(10,14),R(4,5),i%5?0x2f5f2a:0x3d7334),R(0.7,1.4),a,Math.cos(a)*r,h,Math.sin(a)*r)); }
@@ -425,7 +787,7 @@ function openHidden(){
   }
   var basketGeo=new THREE.LatheGeometry([new THREE.Vector2(0.01,0),new THREE.Vector2(6.5,1.2),new THREE.Vector2(10,5.5),new THREE.Vector2(11.9,11),new THREE.Vector2(12.5,16),new THREE.Vector2(12.5,20)],28);
   // ---------- items that can be hidden (costs version) ----------
-  var ITEMS={}, HIDDEN={};
+  var ITEMS={}, HIDDEN={cab:true}; // the cabinet starts hidden
   function regItem(id,name,obj){ obj.userData.itemId=id; ITEMS[id]={name:name,obj:obj}; }
   function shown(o){ while(o){ if(!o.visible) return false; o=o.parent; } return true; }
   function applyHidden(){
@@ -433,7 +795,9 @@ function openHidden(){
     L.dims.children.forEach(function(c){ c.visible=!(c.userData.owner && HIDDEN[c.userData.owner]); });
     var cb=document.querySelector('[data-tog=cab]'); if(cb) cb.setAttribute('aria-pressed',HIDDEN.cab?'false':'true');
     var n=Object.keys(HIDDEN).filter(function(id){ return HIDDEN[id] && ITEMS[id]; }).length, hb=document.getElementById('hiddenBtn');
-    if(hb){ hb.textContent='מוסתרים ('+n+')'; hb.style.display=(EDITOR && n)?'':'none'; }
+    if(hb){ hb.textContent='↩ החזרת מוסתרים ('+n+')'; hb.style.display=(EDITOR && n)?'':'none'; }
+    if(typeof renderBOM==='function') renderBOM();
+    if(window.__sunRefresh) window.__sunRefresh();
   }
   window.__hide=function(id,on){ if(on===undefined) on=true; if(on) HIDDEN[id]=true; else delete HIDDEN[id]; applyHidden(); };
   window.__hiddenList=function(){ return Object.keys(HIDDEN).filter(function(id){ return HIDDEN[id] && ITEMS[id]; }).map(function(id){ return {id:id,name:ITEMS[id].name}; }); };
@@ -464,11 +828,11 @@ function openHidden(){
   var hlMat=new THREE.MeshLambertMaterial({color:0xe7f3e3});
   function buildPlanters(){
   while(L.planters.children.length) L.planters.remove(L.planters.children[0]);
-  planterObjs.length=0; planterHit.length=0;
+  planterObjs.length=0; planterHit.length=0; M.planter.color.setHex(POT(V).c);
   PLANTERS.forEach(function(x0,i){
     var g=new THREE.Group(); g.position.set(x0,0,PL_Z0);
     var body=new THREE.Mesh(new THREE.BoxGeometry(PL_L,PL_H,PL_D),M.planter); body.position.set(PL_L/2,PL_H/2,PL_D/2); g.add(body);
-    [8,13,18].forEach(function(y){ var gr=new THREE.Mesh(new THREE.BoxGeometry(PL_L+0.3,0.5,PL_D+0.3),M.groove); gr.position.set(PL_L/2,y,PL_D/2); g.add(gr); });
+    if(POT(V).stripes) [8,13,18].forEach(function(y){ var gr=new THREE.Mesh(new THREE.BoxGeometry(PL_L+0.3,0.5,PL_D+0.3),M.groove); gr.position.set(PL_L/2,y,PL_D/2); g.add(gr); });
     var so=new THREE.Mesh(new THREE.BoxGeometry(PL_L-3,0.6,PL_D-3),M.soil); so.position.set(PL_L/2,PL_H-1.6,PL_D/2); g.add(so);
     var plants=new THREE.Group(); g.add(plants);
     body.userData.planter=i; planterHit.push(body);
@@ -480,9 +844,9 @@ function openHidden(){
   }
   function fillPlanter(i){
     var o=planterObjs[i]; while(o.plants.children.length) o.plants.remove(o.plants.children[0]);
-    choice[i].forEach(function(k,slot){ var px=PL_L/2; var p=FLOORGEN[k](); p.position.set(px,PL_H-1.4,PL_D/2); o.plants.add(p); });
+    var n=choice[i].length; choice[i].forEach(function(k,slot){ var px=PL_L*(slot+0.5)/n; var p=FLOORGEN[k](); p.position.set(px,PL_H-1.4,PL_D/2); o.plants.add(p); });
   }
-  onChoice=function(i){ fillPlanter(i); if(window.__tags) window.__tags(); };
+  onChoice=function(i){ fillPlanter(i); if(window.__tags) window.__tags(); if(window.__sunShadows) window.__sunShadows(); };
   buildPlanters();
 
   // ---------- woman, 170 cm, for scale ----------
@@ -548,6 +912,8 @@ function openHidden(){
     box(g,grey,a.w*0.04,6,a.d,a.w*0.18,a.h-12,0.5);   // service panel
   })();
   regItem('cab','ארונית',L.cab); regItem('ac','מזגן',L.ac);
+  if(SAVED && SAVED.hid){ Object.keys(HIDDEN).forEach(function(id){ delete HIDDEN[id]; }); SAVED.hid.forEach(function(id){ HIDDEN[id]=true; }); }
+  applyHidden();
   var acHit=[], womanHit=[];
   L.ac.traverse(function(m){ if(m.isMesh) acHit.push(m); });
   L.woman.traverse(function(m){ if(m.isMesh) womanHit.push(m); });
@@ -574,12 +940,12 @@ function openHidden(){
   function dimZ(x,y,z0,z1,text){ line(new THREE.Vector3(x,y,z0),new THREE.Vector3(x,y,z1)); [z0,z1].forEach(function(z){ line(new THREE.Vector3(x-4,y,z),new THREE.Vector3(x+4,y,z)); }); label(text,x,y+7,(z0+z1)/2,8); }
   function buildDims(){
     SEG.forEach(function(sg){ dimX(sg.x0,sg.x1,H+14,W+T/2,sg.w+' '+NAMES[sg.t]); });
-    dimX(0,LEN,H+40,W+T/2,'890 סה״כ');
+    dimX(0,LEN,H+40,W+T/2,LEN+' סה״כ');
     dimY(-14,0,SILL,W+T/2,'127 אדן');
     dimY(-14,SILL,H,W+T/2,'147 פתח');
     dimY(-40,0,H,W/2,'274 תקרה');
     dimZ(-14,2,0,W,'145 רוחב');
-    dimZ(SEG[2].x0+SEG[2].w/2,H+4,W,W+T,'20');
+    dimZ(SEG[3].x0+SEG[3].w/2,H+4,W,W+T,'20');
     dimOwner='h0'; dimY(HANG[0].x-POT_R-6,0,POT_BOTTOM,POT_Z,'220');
     dimOwner='cab';
     dimX(CAB.x0,CAB.x0+CAB.l,CAB.h+6,CAB.d/2,String(CAB.l));
@@ -610,13 +976,113 @@ function openHidden(){
   if(document.fonts && document.fonts.ready){ document.fonts.ready.then(rebuildDims); } else rebuildDims();
   onVariant=function(){ buildPlanters(); rebuildDims(); }; window.__tags=buildTags;
 
+  // ---------- sun-time simulation: Jaffa 32.05N 34.75E. World axes: x = north, z = east, y = up ----------
+  (function(){
+    var LAT=32.05, LON=34.75, rad=Math.PI/180;
+    var dateEl=document.getElementById('sunDate'), timeEl=document.getElementById('sunTime'), readEl=document.getElementById('sunRead'), playEl=document.getElementById('sunPlay'), presetEl=document.getElementById('sunPreset'), bar=document.getElementById('sunbar'), btn=document.getElementById('sunSimBtn');
+    if(!dateEl||!btn) return;
+    renderer.shadowMap.enabled=true; renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+    scene.add(sun.target);
+    var BASE={sunI:sun.intensity, sunPos:sun.position.clone(), hemi:hemi.intensity, fill:fill.intensity};
+    var C0=new THREE.Vector3(LEN/2,0,W/2);
+    sun.shadow.mapSize.set(2048,2048); var sc=sun.shadow.camera; sc.left=-800; sc.right=800; sc.top=800; sc.bottom=-800; sc.near=10; sc.far=4000; sc.updateProjectionMatrix(); sun.shadow.bias=-0.0006; sun.shadow.normalBias=0.8;
+    // occluders for the hour count (not drawn) + invisible shadow casters: the slab above and the building to the west
+    var SOLID=[], BREEZE=[], occ=new THREE.MeshBasicMaterial(), inv=new THREE.MeshBasicMaterial({colorWrite:false,depthWrite:false});
+    function ob(list,x0,y0,z0,w,h,d){ var m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),occ); m.position.set(x0+w/2,y0+h/2,z0+d/2); m.updateMatrixWorld(true); list.push(m); }
+    var casters=new THREE.Group(); casters.visible=false; scene.add(casters);
+    function mass(x0,y0,z0,w,h,d){ ob(SOLID,x0,y0,z0,w,h,d); var m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),inv); m.position.set(x0+w/2,y0+h/2,z0+d/2); m.castShadow=true; casters.add(m); }
+    mass(0,H,-400,LEN,20,400+W+T);      // ceiling slab, up to the outer face of the east wall
+    mass(0,0,-400,LEN,H,380);           // the building west of the balcony
+    SEG.forEach(function(sg){ if(sg.t==='win') ob(BREEZE,sg.x0,0,W,sg.w,SILL,T); else ob(SOLID,sg.x0,0,W,sg.w,H,T); });
+    function sunAt(ms){ var d=(ms-Date.UTC(2000,0,1,12))/864e5;
+      var g=((357.529+0.98560028*d)%360)*rad, q=280.459+0.98564736*d;
+      var Ls=((q+1.915*Math.sin(g)+0.020*Math.sin(2*g))%360)*rad, e=(23.439-0.00000036*d)*rad;
+      var ra=Math.atan2(Math.cos(e)*Math.sin(Ls),Math.cos(Ls)), dec=Math.asin(Math.sin(e)*Math.sin(Ls));
+      var gmst=((18.697374558+24.06570982441908*d)%24+24)%24, Hh=(gmst*15+LON)*rad-ra, ph=LAT*rad;
+      var el=Math.asin(Math.sin(ph)*Math.sin(dec)+Math.cos(ph)*Math.cos(dec)*Math.cos(Hh));
+      var az=Math.atan2(-Math.sin(Hh),Math.tan(dec)*Math.cos(ph)-Math.sin(ph)*Math.cos(Hh));
+      return {el:el/rad, az:((az/rad)%360+360)%360}; }
+    function dirOf(p){ var e=p.el*rad, a=p.az*rad; return new THREE.Vector3(Math.cos(e)*Math.cos(a),Math.sin(e),Math.cos(e)*Math.sin(a)); }
+    function ilOff(y,m,d){ function lastSun(mo){ var t=new Date(Date.UTC(y,mo,0)); return t.getUTCDate()-t.getUTCDay(); } var k=m*100+d; return (k>=300+lastSun(3)-2 && k<1000+lastSun(10))?3:2; } // Israel summer time
+    function msOf(ds,h){ var p=ds.split('-').map(Number); return Date.UTC(p[0],p[1]-1,p[2])+(h-ilOff(p[0],p[1],p[2]))*36e5; }
+    function pad(n){ return String(n).padStart(2,'0'); }
+    function hhmm(h){ var m=Math.round(h*60); return pad(Math.floor(m/60))+':'+pad(m%60); }
+    function today(){ var t=new Date(); return t.getFullYear()+'-'+pad(t.getMonth()+1)+'-'+pad(t.getDate()); }
+    function fmtDate(ds){ var p=ds.split('-'); return +p[2]+'.'+(+p[1])+'.'+p[0]; }
+    function compass(a){ return ['צפון','צפון־מזרח','מזרח','דרום־מזרח','דרום','דרום־מערב','מערב','צפון־מערב'][Math.round(a/45)%8]; }
+    function riseSet(ds){ var r=null,s=null,prev=null; for(var h=3;h<=21;h+=1/60){ var up=sunAt(msOf(ds,h)).el>-0.833; if(prev!==null && up!==prev){ if(up) r=h; else s=h; } prev=up; } return {r:r,s:s}; }
+    var rc=new THREE.Raycaster();
+    // ---------- total daily light (DLI): direct + sky + through the blocks + reflections ----------
+    var LMOD=null, LGRID=null, GX=40, GZ=6, OPEN=0, HEAT=true;
+    function lightPrep(){ if(LMOD) return; LMOD=lightModel({lat:LAT,lon:LON,LEN:LEN,W:W,T:T,H:H,SILL:SILL,seg:SEG,recess:{x0:RC.x0,x1:RC.x1,d:RC.d,door:RC.door},rho:{floor:0.35,wall:0.6,ceil:0.7,glass:0.1,out:0.2},porosity:0.4,holeRatio:1.2,diffuseBoost:1.6,parPerW:2.05,bounces:3,patch:30,patchRays:100,pointRays:600,stepH:0.25});
+      LGRID=[]; for(var j=0;j<GZ;j++) for(var i=0;i<GX;i++) LGRID.push(LMOD.prepPoint({p:[(i+.5)*LEN/GX,70,(j+.5)*W/GZ]},256)); }
+    var hm=document.createElement('canvas'); hm.width=GX; hm.height=GZ; var hctx=hm.getContext('2d');
+    var hmTex=new THREE.CanvasTexture(hm); hmTex.magFilter=THREE.LinearFilter; hmTex.minFilter=THREE.LinearFilter;
+    var hmMesh=new THREE.Mesh(new THREE.PlaneGeometry(LEN,W),new THREE.MeshBasicMaterial({map:hmTex,transparent:true,opacity:0.6,depthWrite:false}));
+    hmMesh.rotation.x=-Math.PI/2; hmMesh.position.set(LEN/2,0.7,W/2); hmMesh.visible=false; scene.add(hmMesh);
+    var STOPS=[[1,[43,58,103]],[2,[58,110,165]],[5,[63,165,138]],[10,[166,216,84]],[20,[255,216,77]],[40,[255,140,26]]];
+    function ramp(v){ v=Math.max(1,Math.min(40,v||1)); var l=Math.log(v); for(var i=1;i<STOPS.length;i++){ var a=STOPS[i-1], b=STOPS[i]; if(v<=b[0]||i===STOPS.length-1){ var t=Math.max(0,Math.min(1,(l-Math.log(a[0]))/(Math.log(b[0])-Math.log(a[0])))); return [0,1,2].map(function(c){ return Math.round(a[1][c]+(b[1][c]-a[1][c])*t); }); } } }
+    function paint(g){ var im=hctx.createImageData(GX,GZ); for(var j=0;j<GZ;j++) for(var i=0;i<GX;i++){ var c=ramp(g[j*GX+i]), q=(j*GX+i)*4; im.data[q]=c[0]; im.data[q+1]=c[1]; im.data[q+2]=c[2]; im.data[q+3]=255; } hctx.putImageData(im,0,0); hmTex.needsUpdate=true; }
+    function lvl(v){ return isNaN(v)?'—':v<2?'צל עמוק':v<5?'צל בהיר':v<10?'אור בינוני':v<20?'אור גבוה':'שמש'; }
+    function lvlTxt(o){ var a=lvl(o.lo), b=lvl(o.hi); return a===b?a:a+' → '+b; }
+    function lightCalc(ds,pts){ try{ lightPrep(); var lp=[]; pts.forEach(function(o){ if(o.tag){ lp.push(LMOD.prepPoint({p:[o.p.x,65,o.p.z]})); lp.push(LMOD.prepPoint({p:[o.p.x,140,o.p.z]})); } else lp.push(LMOD.prepPoint({p:[o.p.x,o.p.y,o.p.z]})); });
+      var r=LMOD.day(ds,lp,LGRID), k=0; pts.forEach(function(o){ if(o.tag){ o.lo=r.pts[k++].dli; o.hi=r.pts[k++].dli; } else { o.lo=o.hi=r.pts[k++].dli; } }); OPEN=r.open; paint(r.grid); }catch(e){ pts.forEach(function(o){ o.lo=o.hi=NaN; }); } }
+    (function(){ var leg=document.getElementById('sunLeg'); if(!leg) return;
+      leg.innerHTML='<button type="button" id="heatBtn" aria-pressed="true">מפת אור</button>'+[[1.5,'צל עמוק'],[3.5,'צל בהיר'],[7,'בינוני'],[14,'גבוה'],[28,'שמש']].map(function(s){ var c=ramp(s[0]); return '<span class="lg"><i style="background:rgb('+c.join(',')+')"></i>'+s[1]+'</span>'; }).join('');
+      document.getElementById('heatBtn').addEventListener('click',function(){ HEAT=!HEAT; this.setAttribute('aria-pressed',HEAT?'true':'false'); hmMesh.visible=SIM&&HEAT; }); })();
+    function classify(p,dir){ rc.set(p,dir); rc.far=5000; if(rc.intersectObjects(SOLID,false).length) return 0; return rc.intersectObjects(BREEZE,false).length?1:2; } // 0 shade, 1 through the blocks, 2 direct
+    function points(){ var hid={}; (window.__hiddenList?window.__hiddenList():[]).forEach(function(it){ hid[it.id]=1; }); var out=[];
+      PLANTERS.forEach(function(x0,i){ if(!hid['p'+i]) out.push({id:'p'+i,name:'אדנית '+(i+1),w:where(i),p:new THREE.Vector3(x0+PL_L/2,PL_H+40,PL_Z0+PL_D/2),tag:new THREE.Vector3(x0+PL_L/2,PL_H+100,PL_Z0-8)}); });
+      HANG.forEach(function(h,j){ if(!hid['h'+j]) out.push({id:'h'+j,name:(h.p==='zygo'?'זיגוקקטוס':'בת שבע')+' · תלוי '+(j+1),w:'',p:new THREE.Vector3(h.x,POT_BOTTOM+12,POT_Z),tag:null}); });
+      return out; }
+    function report(ds){ var pts=points(), step=1/6; pts.forEach(function(o){ o.d=0; o.f=0; o.win=[]; o.cur=null; });
+      for(var h=4;h<20.001;h+=step){ var sp=sunAt(msOf(ds,h+step/2)), on=sp.el>0, dir=on?dirOf(sp):null;
+        pts.forEach(function(o){ var c=on?classify(o.p,dir):0;
+          if(c===2){ o.d+=step; if(!o.cur) o.cur=[h,h]; o.cur[1]=h+step; } else { if(c===1) o.f+=step; if(o.cur){ o.win.push(o.cur); o.cur=null; } } }); }
+      pts.forEach(function(o){ if(o.cur) o.win.push(o.cur); }); return pts; }
+    function f1(x){ return String(Math.round(x*10)/10); }
+    var SIM=false, zoneWas=null, tagsG=new THREE.Group(); tagsG.visible=false; scene.add(tagsG);
+    var sphere=new THREE.Mesh(new THREE.SphereGeometry(16,16,12),new THREE.MeshBasicMaterial({color:0xffc928})); sphere.visible=false; scene.add(sphere);
+    // compass words on the ground around the balcony
+    var compG=new THREE.Group(); scene.add(compG);
+    label('צפון',LEN+50,4,W/2,13,compG); label('דרום',-50,4,W/2,13,compG); label('מזרח',LEN/2,4,W+T+55,13,compG); label('מערב',LEN/2,4,-T-60,13,compG);
+    function refresh(){ var ds=dateEl.value||today(), pts=report(ds), rs=riseSet(ds); lightCalc(ds,pts); window.__lightInfo={}; pts.forEach(function(o){ o.date=fmtDate(ds); window.__lightInfo[o.id]=o; });
+      var tb=document.getElementById('sunTbl'); if(tb) tb.innerHTML=pts.map(function(o){ return '<tr><td>'+o.name+(o.w?'<span class="tag">'+o.w+'</span>':'')+'</td><td class="n">'+f1(o.d)+'</td><td class="n">'+f1(o.f)+'</td><td>'+(o.win.length?o.win.map(function(w){ return hhmm(w[0])+'–'+hhmm(w[1]); }).join(', '):'אין')+'</td><td class="n">'+(o.tag?f1(o.lo)+' → '+f1(o.hi):f1(o.lo))+'</td><td>'+lvlTxt(o)+'</td></tr>'; }).join('');
+      var nt=document.getElementById('sunNote'); if(nt) nt.textContent='ליום '+fmtDate(ds)+' · זריחה '+(rs.r?hhmm(rs.r):'—')+' · שקיעה '+(rs.s?hhmm(rs.s):'—')+' · אור יומי בשטח פתוח: '+f1(OPEN)+' מול. ישירה = קרן שמש מגיעה לצמח בלי לעבור דרך קיר, תקרה או בלוקים. מסוננת = עוברת דרך החורים בבלוקים, אור חלקי.';
+      while(tagsG.children.length) tagsG.remove(tagsG.children[0]);
+      pts.forEach(function(o){ if(o.tag) label('☀ '+f1(o.d)+' ש׳ · אור '+f1(o.lo)+'–'+f1(o.hi)+' מול',o.tag.x,o.tag.y,o.tag.z,7,tagsG); });
+      tagsG.visible=SIM; }
+    function shadowsOn(){ scene.traverse(function(o){ if(!o.isMesh || o.parent===casters || o===sphere) return; var m=o.material; if(!m || m.transparent || m.colorWrite===false) return;
+      o.castShadow=true; o.receiveShadow=true; if(m.alphaTest>0 && m.map && !o.customDepthMaterial) o.customDepthMaterial=new THREE.MeshDepthMaterial({depthPacking:THREE.RGBADepthPacking,map:m.map,alphaTest:m.alphaTest}); }); }
+    function apply(){ var ds=dateEl.value||today(), h=+timeEl.value, sp=sunAt(msOf(ds,h)), up=sp.el>0;
+      readEl.textContent=hhmm(h)+' · '+(up?('גובה '+Math.round(sp.el)+'° · מ'+compass(sp.az)+' ('+Math.round(sp.az)+'°)'):'השמש מתחת לאופק');
+      if(!SIM) return;
+      var d=dirOf(sp); sun.target.position.copy(C0); sun.position.copy(C0).addScaledVector(d,1500);
+      sun.castShadow=up; sun.intensity=up?0.35+0.75*Math.min(1,Math.sin(sp.el*rad)*2):0; hemi.intensity=up?0.45:0.3; fill.intensity=0.12;
+      sphere.visible=up; sphere.position.copy(C0).addScaledVector(d,900); }
+    function setSim(on){ SIM=on; bar.hidden=!on; btn.setAttribute('aria-pressed',on?'true':'false'); casters.visible=on; tagsG.visible=on; hmMesh.visible=on&&HEAT;
+      if(on){ shadowsOn(); if(L.sun){ zoneWas=L.sun.visible; L.sun.visible=false; } refresh(); apply(); }
+      else { if(timer){ clearInterval(timer); timer=null; playEl.textContent='▶'; } sun.castShadow=false; sun.intensity=BASE.sunI; sun.position.copy(BASE.sunPos); sun.target.position.set(0,0,0); hemi.intensity=BASE.hemi; fill.intensity=BASE.fill; sphere.visible=false; if(L.sun && zoneWas!==null) L.sun.visible=zoneWas; zoneWas=null; } }
+    btn.addEventListener('click',function(){ setSim(!SIM); });
+    var timer=null;
+    playEl.addEventListener('click',function(){ if(timer){ clearInterval(timer); timer=null; playEl.textContent='▶'; return; } playEl.textContent='⏸';
+      timer=setInterval(function(){ var v=+timeEl.value+0.05; if(v>+timeEl.max) v=+timeEl.min; timeEl.value=String(v); apply(); },60); });
+    timeEl.addEventListener('input',apply);
+    dateEl.addEventListener('change',function(){ refresh(); apply(); });
+    presetEl.addEventListener('change',function(){ var v=presetEl.value; if(!v) return; dateEl.value=v==='today'?today():(new Date().getFullYear()+'-'+v); presetEl.value=''; refresh(); apply(); });
+    window.__sunRefresh=function(){ refresh(); if(SIM){ shadowsOn(); apply(); } };
+    window.__sunShadows=function(){ if(SIM) shadowsOn(); };
+    dateEl.value=today(); var now=new Date(), nh=now.getHours()+now.getMinutes()/60; timeEl.value=String(Math.max(6,Math.min(18,nh)));
+    refresh(); apply();
+  })();
+
   // ---------- views ----------
   var VIEWS={
     overview:{p:[-200,560,-380],t:[430,90,80],west:false},
     eye:{p:[6,160,35],t:[420,150,95],west:false},
-    east:{p:[445,150,-620],t:[445,140,145],west:false},
-    top:{p:[445,1350,72.6],t:[445,0,72.5],west:false},
-    cab:{p:[629,272,100],t:[629,80,12],west:false}
+    east:{p:[495,150,-680],t:[495,140,145],west:false},
+    top:{p:[495,1450,72.6],t:[495,0,72.5],west:false},
+    cab:{p:[480,272,130],t:[480,80,20],west:false}
   };
   var anim=null;
   function goView(k,instant){
@@ -630,7 +1096,7 @@ function openHidden(){
   document.querySelectorAll('[data-view]').forEach(function(b){ b.addEventListener('click',function(){ goView(b.dataset.view); }); });
   document.querySelectorAll('[data-tog]').forEach(function(b){ b.addEventListener('click',function(){
     var on=b.getAttribute('aria-pressed')!=='true'; b.setAttribute('aria-pressed',on?'true':'false');
-    if(b.dataset.tog==='dims') L.dims.visible=on; if(b.dataset.tog==='ceil') L.ceil.visible=on; if(b.dataset.tog==='west') L.west.visible=on; if(b.dataset.tog==='tags') L.tags.visible=on; if(b.dataset.tog==='woman') L.woman.visible=on; if(b.dataset.tog==='cab') window.__hide('cab',!on); if(b.dataset.tog==='cabopen' && window.__cabOpen){ window.__cabOpen(on); if(on){ window.__hide('cab',false); goView('cab'); } else if(!document.querySelector('[data-view]')) goView('overview'); }
+    if(b.dataset.tog==='sun') L.sun.visible=on; if(b.dataset.tog==='dims') L.dims.visible=on; if(b.dataset.tog==='ceil') L.ceil.visible=on; if(b.dataset.tog==='west') L.west.visible=on; if(b.dataset.tog==='tags') L.tags.visible=on; if(b.dataset.tog==='woman') L.woman.visible=on; if(b.dataset.tog==='cab') window.__hide('cab',!on); if(b.dataset.tog==='cabopen' && window.__cabOpen){ window.__cabOpen(on); if(on){ window.__hide('cab',false); var cx=CAB.x0+CAB.l/2; VIEWS.cab={p:[cx,272,100],t:[cx,80,12],west:false}; goView('cab'); } else if(!document.querySelector('[data-view]')) goView('overview'); }
   }); });
   goView('overview',true);
 
@@ -642,19 +1108,92 @@ function openHidden(){
     var r=renderer.domElement.getBoundingClientRect(); ptr.set(((e.clientX-r.left)/r.width)*2-1, -((e.clientY-r.top)/r.height)*2+1);
     ray.setFromCamera(ptr,camera);
     // the client page (EDITOR=false) is an illustration only: tapping a planter or pot does nothing
-    var targets=(EDITOR?planterHit.concat(hangHit,acHit,womanHit):[]).concat(cabHit);
-    var hit=ray.intersectObjects(targets,false).filter(function(h){ return shown(h.object); })[0];
-    if(!hit){ closeSheet(); return; }
-    var o=hit.object;
-    if(o.userData.cab){
-      if(EDITOR) openItem('cab'); else { var cb=document.querySelector('[data-tog=cabopen]'); if(cb) cb.click(); }
+    if(!EDITOR){
+      var ch=ray.intersectObjects(cabHit,false).filter(function(h){ return shown(h.object); })[0];
+      if(ch){ var cb=document.querySelector('[data-tog=cabopen]'); if(cb) cb.click(); } else closeSheet();
       return;
     }
-    if(o.userData.planter!=null){ openPlanter(o.userData.planter); return; }
-    if(o.userData.hang!=null){ openHang(HANG[o.userData.hang]); return; }
-    while(o && !o.userData.itemId) o=o.parent;
-    if(o) openItem(o.userData.itemId);
+    // costs version: any part of an item (pot, plant, leaves, chains, bracket) opens that item's card
+    var hit=ray.intersectObjects([L.planters,L.hang,L.cab,L.ac,L.woman],true).filter(function(h){ return h.object.isMesh && shown(h.object); })[0];
+    if(!hit){ closeSheet(); return; }
+    var o=hit.object; while(o && !o.userData.itemId) o=o.parent;
+    if(!o){ closeSheet(); return; }
+    var id=o.userData.itemId;
+    if(id.charAt(0)==='p') openPlanter(+id.slice(1));
+    else if(id.charAt(0)==='h') openHang(HANG[+id.slice(1)]);
+    else openItem(id);
   });
+
+  // ---------- drag to move (costs version) ----------
+  // planters, hanging pots and the cabinet slide along their wall; the AC and the woman move on the floor
+  if(EDITOR){
+    var ORIG={p:VARIANTS.map(function(v){ return v.x.slice(); }), h:HANG.map(function(h){ return h.x; }), cab:CAB.x0, ac:[ACU.x0,ACU.z0], woman:[WOMAN.x,WOMAN.z]};
+    var drag=null, plane=new THREE.Plane(), hitPt=new THREE.Vector3(), UPV=new THREE.Vector3(0,1,0);
+    var hintEl=document.getElementById('hint'), HINT='גוררים פריט כדי להזיז אותו · גוררים רקע כדי לסובב · נגיעה בפריט לפרטים';
+    if(hintEl) hintEl.textContent=HINT;
+    function aim(cx,cy){ var r=renderer.domElement.getBoundingClientRect(); ptr.set(((cx-r.left)/r.width)*2-1, -((cy-r.top)/r.height)*2+1); ray.setFromCamera(ptr,camera); }
+    function itemAt(cx,cy){ aim(cx,cy);
+      var hit=ray.intersectObjects([L.planters,L.hang,L.cab,L.ac,L.woman],true).filter(function(h){ return h.object.isMesh && shown(h.object); })[0];
+      if(!hit) return null; var o=hit.object; while(o && !o.userData.itemId) o=o.parent;
+      return o?{id:o.userData.itemId,point:hit.point}:null; }
+    function getPos(id){
+      if(id.charAt(0)==='p') return {x:PLANTERS[+id.slice(1)],z:0};
+      if(id.charAt(0)==='h') return {x:HANG[+id.slice(1)].x,z:0};
+      if(id==='cab') return {x:CAB.x0,z:0};
+      if(id==='ac') return {x:ACU.x0,z:ACU.z0};
+      return {x:WOMAN.x,z:WOMAN.z}; }
+    function clamp(v,a,b){ return Math.max(a,Math.min(b,v)); }
+    function half(v){ return Math.round(v*2)/2; }
+    function setPos(id,x,z){
+      if(id.charAt(0)==='p'){ var i=+id.slice(1); x=clamp(half(x),0,LEN-PL_L); PLANTERS[i]=x; planterObjs[i].g.position.x=x; }
+      else if(id.charAt(0)==='h'){ var j=+id.slice(1); x=clamp(half(x),POT_R,LEN-POT_R); HANG[j].x=x; ITEMS[id].obj.position.x=x-ORIG.h[j]; }
+      else if(id==='cab'){ x=clamp(half(x),0,LEN-CAB.l); CAB.x0=x; L.cab.position.x=x-ORIG.cab; }
+      else if(id==='ac'){ x=clamp(half(x),0,LEN-ACU.d); z=clamp(half(z),0,W-ACU.w); ACU.x0=x; ACU.z0=z; L.ac.position.set(x-ORIG.ac[0],0,z-ORIG.ac[1]); }
+      else if(id==='woman'){ x=clamp(half(x),20,LEN-20); z=clamp(half(z),15,W-15); WOMAN.x=x; WOMAN.z=z; ITEMS.woman.obj.position.set(x,0,z); }
+    }
+    function moved(){ return PLANTERS.some(function(x,i){ return x!==ORIG.p[V][i]; }) || HANG.some(function(h,j){ return h.x!==ORIG.h[j]; }) ||
+      CAB.x0!==ORIG.cab || ACU.x0!==ORIG.ac[0] || ACU.z0!==ORIG.ac[1] || WOMAN.x!==ORIG.woman[0] || WOMAN.z!==ORIG.woman[1]; }
+    var resetBtn=document.getElementById('resetPosBtn');
+    var LOCKED=false; try{ LOCKED=localStorage.getItem('danaBalconyLock')==='1'; }catch(e){}
+    var lockBtn=document.getElementById('lockBtn');
+    function setLock(on){ LOCKED=on; try{ localStorage.setItem('danaBalconyLock',on?'1':'0'); }catch(e){}
+      if(lockBtn){ lockBtn.style.display=''; lockBtn.setAttribute('aria-pressed',on?'true':'false'); lockBtn.textContent=on?'🔒 מיקומים נעולים':'🔓 נעילת מיקומים'; }
+      if(hintEl) hintEl.textContent=on?'המיקומים נעולים · גוררים כדי לסובב · נגיעה בפריט לפרטים':HINT;
+      if(resetBtn) resetBtn.style.display=(moved()&&!on)?'':'none'; }
+    if(lockBtn) lockBtn.addEventListener('click',function(){ setLock(!LOCKED); });
+    setLock(LOCKED);
+    function afterMove(){ rebuildDims(); if(typeof drawSVG==='function') drawSVG(); if(resetBtn) resetBtn.style.display=(moved()&&!LOCKED)?'':'none'; }
+    function moveHint(id){ if(!hintEl) return; var p=getPos(id), nm=ITEMS[id]?ITEMS[id].name:'';
+      var t=nm+' · '+Math.round(p.x)+' מהקצה הדרומי';
+      if(id==='ac'||id==='woman') t+=' · '+Math.round(p.z)+' מהקיר המערבי';
+      hintEl.textContent=t; }
+    if(resetBtn) resetBtn.addEventListener('click',function(){
+      PLANTERS.forEach(function(x,i){ setPos('p'+i,ORIG.p[V][i]); });
+      HANG.forEach(function(h,j){ setPos('h'+j,ORIG.h[j]); });
+      setPos('cab',ORIG.cab); setPos('ac',ORIG.ac[0],ORIG.ac[1]); setPos('woman',ORIG.woman[0],ORIG.woman[1]);
+      afterMove(); });
+    // capture phase on the stage: decide before the orbit controls see the press
+    stage.addEventListener('pointerdown',function(e){
+      if(e.button || LOCKED) return;
+      var it=itemAt(e.clientX,e.clientY); if(!it) return;
+      plane.setFromNormalAndCoplanarPoint(UPV,it.point);
+      drag={id:it.id,start:it.point.clone(),p0:getPos(it.id),moved:false,sx:e.clientX,sy:e.clientY};
+      controls.enabled=false;
+    },true);
+    window.addEventListener('pointermove',function(e){
+      if(!drag) return;
+      if(!drag.moved && Math.hypot(e.clientX-drag.sx,e.clientY-drag.sy)<6) return;
+      if(!drag.moved){ drag.moved=true; closeSheet(); }
+      aim(e.clientX,e.clientY); if(!ray.ray.intersectPlane(plane,hitPt)) return;
+      setPos(drag.id, drag.p0.x+(hitPt.x-drag.start.x), drag.p0.z+(hitPt.z-drag.start.z));
+      moveHint(drag.id);
+    });
+    window.addEventListener('pointerup',function(){
+      if(!drag) return; var d=drag; drag=null; controls.enabled=true;
+      if(d.moved){ afterMove(); setTimeout(function(){ if(hintEl && !drag) hintEl.textContent=HINT; },1800); }
+    });
+    window.__dragTest={setPos:setPos,afterMove:afterMove,getPos:getPos,itemAt:itemAt}; // for checks
+  }
 
   function resize(){ var w=stage.clientWidth, h=stage.clientHeight; renderer.setSize(w,h,false); camera.aspect=w/h; camera.fov = w<h ? 60 : 45; camera.updateProjectionMatrix(); }
   window.addEventListener('resize',resize); resize();
