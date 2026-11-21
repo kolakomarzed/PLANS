@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="he" dir="rtl">
+<html lang="he" dir="rtl" data-theme="light" style="color-scheme:light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -7,6 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
+[hidden]:not([hidden=until-found i]){display:none!important}
 .vlab{font-size:.84rem;color:var(--muted);align-self:center;padding:0 4px}
 #varSel{max-width:70vw}
 .cmp{margin:14px 0 22px}
@@ -150,7 +151,7 @@ var CAB={x0:435,l:90,d:47,h:170}; var SUN={x0:0,x1:300}; // x=0 is the SOUTH end
 var ACU={x0:950,z0:5,w:80,d:30,h:55};
 var EVEN9=[10,112.1,214.3,316.4,418.5,520.6,622.8,724.9,827], EVEN7=[10,146.2,282.3,418.5,554.7,690.8,827];
 var VARIANTS=[
- {n:'6 אדניות גונדולה', L:78, H:25, x:[11,161,340,527,701,874.5], p:[['taberna','trach'],['chamae','spath'],['trach','stephan'],['dipla','trach'],['spath','zamia'],['trach','dipla']], d:'אדנית מתחת לכל פתח, שם האור, ואדנית אחת בלבד מתחת לכל קיר – 6 אדניות במקום 7. בכל פתח יסמין כוכבים, לרצף ירוק וריחני לאורך כל המעקה. מתחת לפתח 100 בדרום, המקום הכי מואר (כ־18–43 מול לפי החישוב) – טברנה ריחנית ליד היסמין. בפתח 158 סטפנוטיס, בפתחים 154 ו־153 דיפלדניה. מתחת לקיר 200 – חמדוריאה וספאתיפילום; מתחת לקיר 194, הכי מוצל – ספאתיפילום וזמיה.',
+ {n:'5 אדניות גונדולה', mix:1, L:78, H:25, x:[161,340,527,701,874.5], p:[['sanse','pepero','syng','ivy'],['dipla','trach'],['trach','dipla'],['cylin','spathO','pepero','drac'],['dipla','trach']], d:'5 אדניות. האדנית הדרומית ביותר, מתחת לפתח 100, יצאה לגמרי. שלוש האדניות מתחת לפתחים: דיפלדניה ויסמין כוכבים בכל אחת – 6 מטפסים. שתי האדניות מתחת לקירות: 8 צמחים קיימים של דנה, 4 בכל אדנית. ההצבה של הצמחים שלה היא הצעה שלי – אפשר להחליף בנגיעה על אדנית.',
   pot:{n:'אדנית גונדולה 78 (גרדן סנטר)',dt:'78 × 30 × 25 · חול / שחור / אפור',price:null,tag:'אתר',soil:50,c:0xd8ccb4,cs:'#e2d6bf',stripes:0}}
 ];
 var PLANTERS;
@@ -171,10 +172,25 @@ var FLOOR={
   dieff:{n:'דיפנבכיה טרופיק',s:7,price:null,src:'תווית',size:'עציץ 18',why:'עלים גדולים לבן־ירוק; רגישה לקור ולרוח, רעילה'},
   stephan:{n:'סטפנוטיס',s:8,price:null,src:'תווית',size:'7 ליטר',why:'מטפס עם פרחים לבנים שעווניים וריחניים בקיץ. צריך אור חזק בלי שמש צהריים – שמש בוקר מהפתח מתאימה לו (הערכה שלי)',climb:1},
   none:{n:'בלי צמח',s:0,price:null,src:'',size:'',why:'המקום הזה באדנית נשאר ריק'},
-  dipla:{n:'דיפלדניה ורודה',s:8,price:null,src:'אתר אייל',size:'10 ליטר',why:'מטפסת עם פרחים ורודים גדולים מהאביב עד הסתיו; שמש הבוקר מהפתח מספיקה לה (הערכה שלי). בלי ריח',climb:1}
+  dipla:{n:'דיפלדניה ורודה',s:8,price:null,src:'אתר אייל',size:'10 ליטר',why:'מטפסת עם פרחים ורודים גדולים מהאביב עד הסתיו; שמש הבוקר מהפתח מספיקה לה (הערכה שלי). בלי ריח',climb:1},
+  sanse:{n:'סנסווריה (של דנה)',s:9,price:null,src:'קיים אצל דנה',size:'מהמרפסת',why:'קיימת אצל דנה. עלים זקופים וגבוהים, עמידה כמעט בכל אור ומעט מים',own:1},
+  cylin:{n:'סנסווריה גלילית (של דנה)',s:9,price:null,src:'קיים אצל דנה',size:'מהמרפסת',why:'קיימת אצל דנה. עלים גליליים זקופים, עמידה מאוד',own:1},
+  pepero:{n:'פפרומיה (של דנה)',s:8,price:null,src:'קיים אצל דנה',size:'מהמרפסת',why:'קיימת אצל דנה. עלים עגולים מבריקים, נמוכה – טובה בקדמת האדנית',own:1},
+  syng:{n:'סינגוניום (של דנה)',s:8,price:null,src:'קיים אצל דנה',size:'מהמרפסת',why:'קיים אצל דנה. עלי חץ, גדל טוב בצל חלקי. גדול יחסית – אולי צריך לדלל',own:1},
+  drac:{n:'דרצנה (של דנה)',s:7,price:null,src:'קיים אצל דנה',size:'מהמרפסת',why:'קיימת אצל דנה. הזן לא זוהה בוודאות (הערכה)',own:1},
+  ivy:{n:'קיסוס (של דנה)',s:8,price:null,src:'קיים אצל דנה',size:'מהמרפסת',why:'קיים אצל דנה. נשפך מעל דופן האדנית',own:1},
+  spathO:{n:'ספאתיפילום (של דנה)',s:8,price:null,src:'קיים אצל דנה',size:'מהמרפסת',why:'קיים אצל דנה. פריחה לבנה בצל מואר',own:1}
 };
-var SHORT={chamae:'חמדוריאה',spath:'ספאתיפילום',zamia:'זמיה',fern:'שרך',pseud:'פסאודרנתמום',cordy:'קורדילין',trach:'יסמין',stephan:'סטפנוטיס',dipla:'דיפלדניה',none:'ריק',taberna:'טברנה',dieff:'דיפנבכיה'};
+function slotName(slot,n){ return n===2?(slot?'צמח צפוני':'צמח דרומי'):(n>2?'מקום '+(slot+1)+' מדרום':'צמח'); }
+var SHORT={sanse:'סנסווריה',cylin:'סנסווריה גלילית',pepero:'פפרומיה',syng:'סינגוניום',drac:'דרצנה',ivy:'קיסוס',spathO:'ספאתיפילום שלה',chamae:'חמדוריאה',spath:'ספאתיפילום',zamia:'זמיה',fern:'שרך',pseud:'פסאודרנתמום',cordy:'קורדילין',trach:'יסמין',stephan:'סטפנוטיס',dipla:'דיפלדניה',none:'ריק',taberna:'טברנה',dieff:'דיפנבכיה'};
 var PINFO={
+ sanse:{lat:'Sansevieria trifasciata (זיהוי מתמונה, 95%)',img:'ph/own_sanse.jpg',need:'1–10',w:'מועטה – לתת להתייבש',h:'60–100 ס״מ',c:'לא מתחת ל־10 מעלות',pet:'רעילה בבליעה',fl:'נדירה'},
+ cylin:{lat:'Sansevieria cylindrica (זיהוי מתמונה, 90%)',img:'ph/own_cylin.jpg',need:'1–10',w:'מועטה – לתת להתייבש',h:'60–150 ס״מ',c:'לא מתחת ל־10 מעלות',pet:'רעילה בבליעה',fl:'נדירה'},
+ pepero:{lat:'Peperomia obtusifolia (זיהוי מתמונה, 90%)',img:'ph/own_pepero.jpg',need:'3–8 (כללי)',w:'מועטה–בינונית',h:'20–30 ס״מ',c:'רגישה לקור',pet:'לא רעילה',fl:'שבלים דקות, לא העיקר'},
+ syng:{lat:'Syngonium podophyllum (זיהוי מתמונה, 85%)',img:'ph/own_syng.jpg',need:'3–8 (כללי)',w:'בינונית',h:'30–60 ס״מ, יכול לטפס',c:'רגיש לקור',pet:'רעיל בבליעה',fl:'נדירה'},
+ drac:{lat:'Dracaena (זיהוי מתמונה, 55%)',img:'ph/own_drac.jpg',need:'3–8 (כללי)',w:'בינונית',h:'לא ידוע – תלוי בזן',c:'רגישה לקור',pet:'רעילה לכלבים וחתולים',fl:'נדירה'},
+ ivy:{lat:'Hedera helix (זיהוי מתמונה, 90%)',img:'ph/own_ivy.jpg',need:'3–10 (כללי)',w:'בינונית',h:'נשפך / מטפס',c:'עמיד לקור',pet:'רעיל בבליעה',fl:'לא העיקר'},
+ spathO:{lat:'Spathiphyllum (זיהוי מתמונה, 90%)',img:'ph/own_spath.jpg',need:'3–8, פורח יותר מעל 5',w:'מרובה – לשמור לח',h:'40–60 ס״מ',c:'נפגע מתחת ל־10 מעלות',pet:'רעיל בבליעה',fl:'לבנה'},
  chamae:{lat:'Chamaedorea elegans',img:'ph/chamae.jpg',need:'2–6',w:'בינונית',h:'1–2 מ׳',c:'סובלת חורף מתון',pet:'לא רעילה',fl:'קטנה וצהובה, לא העיקר'},
  spath:{lat:'Spathiphyllum',img:'ph/spath.jpg',need:'3–8, פורח יותר מעל 5',w:'מרובה – לשמור לח',h:'40–60 ס״מ',c:'נפגע מתחת ל־10 מעלות',pet:'רעיל בבליעה',fl:'לבנה'},
  zamia:{lat:'Zamioculcas zamiifolia',img:'ph/zamia.jpg',need:'2–6',w:'מועטה – לתת למצע להתייבש',h:'60–90 ס״מ',c:'לא מתחת ל־10 מעלות',pet:'רעילה בבליעה',fl:'נדירה'},
@@ -204,7 +220,7 @@ if(SAVED){ try{
 }catch(e){ SAVED=null; } }
 function variantChoice(i){ var c=store.c[i], d=VARIANTS[i].p; var ok=c && c.length===d.length && c.every(function(x,j){ var a=norm(x); return a.length===norm(d[j]).length && a.every(function(k){return FLOOR[k];}); }); return (ok?c:d).map(norm); }
 var V=Math.max(0,Math.min(store.v,VARIANTS.length-1)); PLANTERS=VARIANTS[V].x; PL_L=LEN_OF(V); PL_H=VARIANTS[V].H||25; var choice=variantChoice(V);
-function saveChoice(){ store.v=V; store.c[V]=choice.map(function(c){return c.slice();}); try{ localStorage.setItem('danaBalconyV7',JSON.stringify(store)); }catch(e){} }
+function saveChoice(){ store.v=V; store.c[V]=choice.map(function(c){return c.slice();}); try{ localStorage.setItem('danaMixV1',JSON.stringify(store)); }catch(e){} }
 var onVariant=null;
 function setSub(){ var el=document.getElementById('subT'); if(el) el.textContent=LEN+' × 145, תקרה 274. '+PLANTERS.length+' אדניות '+PL_L+'×'+PL_D+'×'+PL_H+(choice[0]&&choice[0].length>1?' עם שני צמחים בכל אחת':'')+', 7 עציצים תלויים, מטפס על הבלוקים. ארונית 90×47×170 ומזגן בקיר המערבי.'; }
 function setVariant(i){ V=i; PLANTERS=VARIANTS[i].x; PL_L=LEN_OF(i); PL_H=VARIANTS[i].H||25; choice=variantChoice(i); saveChoice(); closeSheet(); renderBOM(); drawSVG(); setSub(); var sel=document.getElementById('varSel'); if(sel) sel.value=String(i); if(onVariant) onVariant(); }
@@ -229,6 +245,16 @@ function fmt(n){ return n.toLocaleString('he-IL')+' ₪'; }
 function renderBOM(){}
 function renderCost(){}
 var onChoice=null;
+// planter materials only (pots, saucers, plants, soil, perlite, climber strings), for comparing proposals
+function costSum(vi,ch,pIdx,nh){
+  var pot=VARIANTS[vi].pot, np=pIdx.length, k=pot.price*np, lo=0, hi=0, EST={trach:[50,90],pseud:[40,80]};
+  if(pot.soil===50){ lo+=69*np; hi+=89*np; }
+  pIdx.forEach(function(i){ ch[i].forEach(function(key){ if(key==='none') return; var f=FLOOR[key]; if(f.price!=null) k+=f.price; else if(EST[key]){ lo+=EST[key][0]; hi+=EST[key][1]; } }); });
+  var lit=pot.soil*np+5*nh, bags=Math.ceil(lit/50), per=Math.round(pot.soil*np/3);
+  lo+=45*bags; hi+=60*bags; if(per){ lo+=Math.round(per*0.6); hi+=Math.round(per*1.2); }
+  var cl=pIdx.filter(function(i){ return ch[i].some(function(key){ return FLOOR[key]&&FLOOR[key].climb; }); }).length; lo+=35*cl; hi+=80*cl;
+  return {k:k,lo:lo,hi:hi};
+}
 function where(i){ var c=PLANTERS[i]+PL_L/2; var sg=SEG.filter(function(s){return c>=s.x0&&c<s.x1;})[0]; return (sg.t==='win'?'מתחת לפתח ':'מתחת לקיר ')+sg.w; }
 function setChoice(i,slot,k){ choice[i][slot]=k; saveChoice(); renderBOM(); drawSVG(); if(onChoice) onChoice(i); }
 
@@ -265,8 +291,8 @@ function svgFor(P,C,opt){ opt=opt||{}; var pot=opt.pot||POT(V);
   o.push('<line x1="'+X(0)+'" y1="'+EY(0)+'" x2="'+X(LEN)+'" y2="'+EY(0)+'" stroke="#1f2a24" stroke-width="2"/>');
   o.push('<line x1="'+X(0)+'" y1="'+EY(H)+'" x2="'+X(LEN)+'" y2="'+EY(H)+'" stroke="#1f2a24" stroke-width="2"/>');
   // planters (in front)
-  var PH={chamae:95,spath:55,zamia:70,fern:40,pseud:75,cordy:85,trach:105,stephan:105,dipla:100,taberna:90,dieff:70};
-  var PC={chamae:'#7fa36f',spath:'#86ad78',zamia:'#4f7a3f',fern:'#9cc56a',pseud:'#c9a1b2',cordy:'#9b3a58',taberna:'#6f9a5f',dieff:'#c3d6a6'};
+  var PH={sanse:70,cylin:68,pepero:26,syng:42,drac:60,ivy:18,spathO:45,chamae:95,spath:55,zamia:70,fern:40,pseud:75,cordy:85,trach:105,stephan:105,dipla:100,taberna:90,dieff:70};
+  var PC={sanse:'#6f8f55',cylin:'#3f5f45',pepero:'#3f7a35',syng:'#7fae66',drac:'#3f6b3a',ivy:'#5f8f4a',spathO:'#86ad78',chamae:'#7fa36f',spath:'#86ad78',zamia:'#4f7a3f',fern:'#9cc56a',pseud:'#c9a1b2',cordy:'#9b3a58',taberna:'#6f9a5f',dieff:'#c3d6a6'};
   P.forEach(function(x0,i){
     o.push('<rect x="'+X(x0)+'" y="'+EY(PL_H)+'" width="'+PL_L*s+'" height="'+PL_H*s+'" fill="'+pot.cs+'" stroke="#6b746e" stroke-width="1"/>');
     if(pot.stripes) [8,13,18].forEach(function(h){ o.push('<line x1="'+X(x0+1)+'" y1="'+EY(h)+'" x2="'+X(x0+PL_L-1)+'" y2="'+EY(h)+'" stroke="#c9c3b6" stroke-width=".8"/>'); });
@@ -416,7 +442,7 @@ function drawSVG(){
 (function(){ var b=document.getElementById('saveBtn'); if(!b) return;
   b.addEventListener('click',function(){ saveChoice();
     var snap={v:V,c:store.c,pos:{p:VARIANTS.map(function(v){ return v.x.slice(); }),h:HANG.map(function(h){ return h.x; }),cab:CAB.x0,ac:[ACU.x0,ACU.z0],woman:[WOMAN.x,WOMAN.z]},hid:(window.__hiddenList?window.__hiddenList():[]).map(function(it){ return it.id; }),irr:!!window.__irr,t:Date.now()};
-    var ok=true; try{ localStorage.setItem('danaBalconySaved',JSON.stringify(snap)); }catch(e){ ok=false; }
+    var ok=true; try{ localStorage.setItem('danaMixSaved',JSON.stringify(snap)); }catch(e){ ok=false; }
     b.textContent=ok?'✓ נשמר':'השמירה נכשלה'; setTimeout(function(){ b.textContent='💾 שמירה'; },1800); }); })();
 renderBOM(); drawSVG(); setSub();
 (function(){ var sel=document.getElementById('varSel'); VARIANTS.forEach(function(v,i){ var o=document.createElement('option'); o.value=String(i); o.textContent=(i+1)+'. '+v.n; sel.appendChild(o); }); sel.value=String(V);
@@ -434,7 +460,7 @@ function openPlanter(i){
   document.getElementById('sheetText').textContent=c.length>1?('כרגע: '+c.map(function(k){ return FLOOR[k].n; }).join(' + ')+'. בוחרים צמח לכל צד:'):('כרגע: '+FLOOR[c[0]].n+' – '+FLOOR[c[0]].why+'. בוחרים צמח:');
   var box=document.getElementById('sheetOpts'); box.innerHTML='';
   c.forEach(function(cur,slot){
-    var sh=document.createElement('div'); sh.className='slotH'; var st=document.createElement('span'); st.textContent=(c.length>1?(slot?'צמח צפוני':'צמח דרומי')+' · ':'')+SHORT[cur]; sh.appendChild(st);
+    var sh=document.createElement('div'); sh.className='slotH'; var st=document.createElement('span'); st.textContent=(c.length>1?slotName(slot,c.length)+' · ':'')+SHORT[cur]; sh.appendChild(st);
     if(cur!=='none'){ var ib=document.createElement('button'); ib.type='button'; ib.className='infobtn'; ib.textContent='הצג פרטים על הצמח הנבחר'; ib.addEventListener('click',function(){ openPlant(cur,'p'+i); }); sh.appendChild(ib);
       var xb=document.createElement('button'); xb.type='button'; xb.className='hidebtn'; xb.textContent='הסתר צמח'; xb.addEventListener('click',function(){ setChoice(i,slot,'none'); openPlanter(i); }); sh.appendChild(xb); }
     box.appendChild(sh);
@@ -732,6 +758,28 @@ function lightModel(cfg){
     stephan:function(){ return climber(8,4,0x2f5f2a,0xf7f5ee,1.0,6); },
     dipla:function(){ return climber(7,3.6,0x2d5a27,0xe8508a,1.6,9); },
     none:function(){ return new THREE.Group(); },
+    sanse:function(){ var g=new THREE.Group();
+      for(var i=0;i<11;i++){ var lf=leaf(R(48,72),R(5,7),i%3?0x5b7d46:0x7f9a5a); var a=R(0,6.28), r=R(0,4); g.add(tilted(lf,R(0.03,0.22),a,Math.cos(a)*r,0,Math.sin(a)*r)); }
+      return g; },
+    cylin:function(){ var g=new THREE.Group();
+      for(var i=0;i<6;i++){ var h=R(42,72); var m=new THREE.Mesh(new THREE.CylinderGeometry(0.25,1.3,h,8),lm(0x34503a)); m.position.y=h/2; var c=new THREE.Group(); c.add(m); var a=R(0,6.28); g.add(tilted(c,R(0.08,0.45),a,Math.cos(a)*R(0,3),0,Math.sin(a)*R(0,3))); }
+      return g; },
+    pepero:function(){ var g=new THREE.Group();
+      for(var i=0;i<16;i++){ var p=new THREE.Group(); var hh=R(6,16); p.add(cyl(0.35,hh,0x4f7a35)); var lf=leaf(R(8,10),R(10,12),i%2?0x2f6b2a:0x3a7a30); lf.position.y=hh; lf.rotation.x=-R(0.6,1.1); p.add(lf); var a=R(0,6.28), r=R(1,7); g.add(tilted(p,R(0.1,0.5),a,Math.cos(a)*r,0,Math.sin(a)*r)); }
+      return g; },
+    syng:function(){ var g=new THREE.Group();
+      for(var i=0;i<12;i++){ var p=new THREE.Group(); var pet=cyl(0.35,R(12,24),0x5f8f45); p.add(pet); var lf=leaf(R(14,18),R(10,12),i%2?0x5f9a48:0x7fae66); lf.position.y=pet.children[0].geometry.parameters.height; p.add(lf); g.add(tilted(p,R(0.3,0.9),R(0,6.28),R(-3,3),0,R(-3,3))); }
+      return g; },
+    drac:function(){ var g=new THREE.Group(); var h=R(30,38); g.add(cyl(0.9,h,0x6b6a4a));
+      for(var i=0;i<22;i++){ var lf=leaf(R(16,22),R(2.6,3.4),i%2?0x2f5a2a:0x3f6b35); g.add(tilted(lf,R(0.4,1.3),R(0,6.28),0,h-R(0,14),0)); }
+      return g; },
+    ivy:function(){ var g=new THREE.Group();
+      for(var s2=0;s2<5;s2++){ var x=R(-8,8), y=2, z=0, dz=-R(1.4,2.2);
+        for(var j=0;j<14;j++){ var lf=leaf(4.2,5,j%2?0x3f6b35:0x5f8f4a); lf.position.set(x+R(-1.5,1.5),y,z); lf.rotation.set(R(-0.6,0.6),R(0,6.28),R(-0.5,0.5)); g.add(lf);
+          if(z>-17){ z+=dz; y+=0.3; } else { y-=2.6; } } }
+      [0,1,2,3].forEach(function(){ var lf=leaf(4.5,5.2,0x3f6b35); g.add(tilted(lf,R(0.6,1.2),R(0,6.28),R(-6,6),1,R(-6,6))); });
+      return g; },
+    spathO:function(){ var g=FLOORGEN.spath(); g.scale.set(0.72,0.8,0.72); return g; },
     taberna:function(){ var g=new THREE.Group();
       for(var s2=0;s2<4;s2++){ var c=cyl(0.7,R(40,60),0x5b4a3a); c.rotation.x=R(-0.25,0.25); c.rotation.z=R(-0.25,0.25); g.add(c); }
       for(var i=0;i<60;i++){ var h=R(20,68), r=R(3,16)*(1-Math.abs(h-44)/70), a=R(0,6.28); g.add(tilted(leaf(R(10,14),R(4,5),i%5?0x2f5f2a:0x3d7334),R(0.7,1.4),a,Math.cos(a)*r,h,Math.sin(a)*r)); }
