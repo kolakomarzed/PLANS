@@ -242,13 +242,7 @@ body.sheetOpen .dock{display:none}
   </div>
 </section>
 
-<section class="pane" id="pane-cost" role="tabpanel" hidden>
-  <div class="sheetbox"><h2>עלויות הקמה</h2>
-  <p class="note">לפי הצמחים וההצעה שנבחרו. "מחיר שנתת", "תיעוד קודם" – מחיר ידוע; "הערכה" – טווח, לא מחיר מחנות.</p>
-  <p><button type="button" id="irrBtn" aria-pressed="false">+ מערכת השקיה · 600 ₪</button></p>
-  <div id="costBody"></div>
-  </div>
-</section>
+
 
 <section class="pane" id="pane-notes" role="tabpanel" hidden>
   <div class="sheetbox"><h2>מידות והנחות</h2>
@@ -520,7 +514,7 @@ function setChoice(id,slot,k){ choice[id][slot]=k; saveChoice(); renderPicks(); 
 var CURTAB='model';
 function showTab(k){
   document.querySelectorAll('.views [role=tab]').forEach(function(t){ t.setAttribute('aria-selected', t.dataset.tab===k?'true':'false'); });
-  ['draw','light','guide','cost','notes','plant'].forEach(function(n){ document.getElementById('pane-'+n).hidden = k!==n; });
+  ['draw','light','guide','cost','notes','plant'].forEach(function(n){ var pe=document.getElementById('pane-'+n); if(pe) pe.hidden = k!==n; });
   document.body.classList.toggle('paneOpen', k!=='model');
   if(k!=='model') closeSheet();
   if(k==='light') renderDay();
@@ -683,60 +677,7 @@ function mixTotals(){ var s=0,p=0,rows=[];
   return {soil:s,per:p,rows:rows}; }
 
 // ---------- costs ----------
-function renderCost(){
-  return;
-  var groups=[], known=0, eLo=0, eHi=0;
-  function G(t){ var g={t:t,rows:[]}; groups.push(g); return g; }
-  function add(g,name,detail,q,unit,lo,hi,tag){ if(!q) return; var r={name:name,detail:detail,q:q,tag:tag||''};
-    if(unit!=null){ r.unit=unit; r.tot=unit*q; known+=r.tot; } else { r.lo=lo; r.hi=hi; eLo+=lo*q; eHi+=hi*q; } g.rows.push(r); }
-  var g1=G('אדניות מעקה'); g1.sub='סה״כ אדניות';
-  add(g1,'אדנית מעקה 59 × 19.5 × 22.8','EDA של אייל, ירוק מרווה',RP.length,140,null,null,'אייל');
-  add(g1,'הכנת ניקוז','לכל אדנית',RP.length,50,null,null,'מחיר שנתת');
-  add(g1,'חבק נירוסטה','כ־1 צול (20–32 מ״מ), 5 לאדנית',RP.length*5,5,null,null,'הערכה');
-  var SEED_N=3;                                                    // 3 seedlings per planter: 2 of the first plant, 1 of the second
-  var g2=G('צמחים לאדניות · 3 שתילים לאדנית'), cnt={}; g2.sub='סה״כ צמחים';
-  RP.forEach(function(p){ choice[p.id].forEach(function(k,i){ cnt[k]=(cnt[k]||0)+(i===0?2:1); }); });
-  Object.keys(cnt).forEach(function(k){ add(g2,PL[k].n,'שתיל בעציץ 12',cnt[k],15,null,null,'אייל'); });
-  var g3=G('עציצים תלויים'); g3.sub='סה״כ עציצים תלויים';
-  add(g3,'עציץ תלוי דמוי ראטן','קוטר 25',HANG.length,35,null,null,'תיעוד קודם');
-  add(g3,'פוטוס','עציץ 4 ליטר',1,60,null,null,'אייל');
-  add(g3,'בת שבע (הויה)','עציץ 4 ליטר',1,70,null,null,'אייל');
-  add(g3,'וו תלייה','זוג ב־40 ₪',HANG.length,20,null,null,'מחיר שנתת');
-  var g4=G('מצע ודשן'), MX=mixTotals(); g4.sub='סה״כ מצע ודשן';
-  add(g4,'אדמה לעציצים','שק 50 ליטר',Math.max(1,Math.ceil(MX.soil/50)),45,null,null,'אייל');
-  add(g4,'פרלייט','שק 10 ליטר',Math.max(1,Math.ceil(MX.per/10)),20,null,null,'אייל');
-  add(g4,'אוסמוקוט','דשן בשחרור איטי, 6 חודשים, 1 ק״ג',1,45,null,null,'אייל');
-  var IRR_COST=600;
-  if(IRR){ var g6=G('השקיה'); add(g6,'מערכת השקיה','טפטוף עם מחשב השקיה · העלות שלך',1,IRR_COST,null,null,'מחיר שנתת'); }
-  function n(v){ return Math.round(v).toLocaleString('he-IL'); }
-  function money(v){ return (Math.round(v*100)/100).toLocaleString('he-IL',{maximumFractionDigits:2}); }
-  function unitTxt(r){ return r.unit!=null?money(r.unit)+' ₪':n(r.lo)+'–'+n(r.hi)+' ₪'; }
-  function totTxt(r){ return r.tot!=null?money(r.tot)+' ₪':n(r.lo*r.q)+'–'+n(r.hi*r.q)+' ₪'; }
-  var h='<div class="tblwrap"><table class="cost"><thead><tr><th>פריט</th><th class="n">כמות</th><th class="n">סה״כ</th></tr></thead><tbody>';
-  var sk=0, sl=0, sh=0;
-  groups.forEach(function(g){ if(!g.rows.length) return;
-    h+='<tr class="grp"><td colspan="3">'+g.t+'</td></tr>';
-    g.rows.forEach(function(r){ if(r.tot!=null) sk+=r.tot; else { sl+=r.lo*r.q; sh+=r.hi*r.q; } });
-    g.rows.forEach(function(r){
-      var sub=(r.detail?r.detail+' · ':'')+'<span class="nw">'+LR(unitTxt(r))+' ליחידה</span>';
-      h+='<tr><td><b>'+r.name+'</b>'+(r.tag?'<span class="tag'+(r.tag==='הערכה'?' a':'')+'">'+r.tag+'</span>':'')+'<div class="sub">'+sub+'</div></td><td class="n">'+r.q+'</td><td class="n">'+LR(totTxt(r))+'</td></tr>'; });
-    if(g.sub){ h+='<tr class="subt"><td colspan="2">'+g.sub+'</td><td class="n">'+LR(sh?n(sk+sl)+'–'+n(sk+sh)+' ₪':money(sk)+' ₪')+'</td></tr>'; sk=0; sl=0; sh=0; }
-  });
-  h+='</tbody><tfoot>'+(eHi?'<tr><td colspan="2">מחירים ידועים</td><td class="n">'+LR(money(known)+' ₪')+'</td></tr><tr><td colspan="2">הערכות</td><td class="n">'+LR(n(eLo)+'–'+n(eHi)+' ₪')+'</td></tr><tr><td colspan="2">סה״כ משוער</td><td class="n">'+LR(n(known+eLo)+'–'+n(known+eHi)+' ₪')+'</td></tr>':'<tr><td colspan="2">סה״כ</td><td class="n">'+LR(money(known)+' ₪')+'</td></tr>')+'</tfoot></table></div>';
-  (function(){
-    var soilL=RP_SOIL*(1-PERL), perL=RP_SOIL*PERL, nAll=RP.length+HANG.length;
-    var parts=[['אדנית',140],['הכנת ניקוז',50],['5 חבקים',25],['3 שתילים',45],
-      ['אדמה ('+Math.round(soilL)+' ליטר)',soilL/50*45],['פרלייט ('+Math.round(perL)+' ליטר)',perL/10*20],['אוסמוקוט (חלק יחסי)',nAll?45/nAll:0]];
-    var tot=0; parts.forEach(function(x){ tot+=x[1]; }); var r5=Math.ceil(tot/5)*5;
-    h+='<div class="note" style="margin-top:10px"><b>אדנית אחת על המעקה, הכל כלול: כ־'+LR(r5+' ₪')+'</b><div class="sub" style="margin-top:4px">'+parts.map(function(x){ return x[0]+': '+LR(Math.round(x[1])+' ₪'); }).join('<br>')+'</div><div class="sub">אדמה, פרלייט ודשן – לפי הכמות שהאדנית צריכה, לא לפי שק שלם. מעוגל כלפי מעלה ל־5.</div></div>';
-  })();
-  h+='<p class="note" style="margin-top:10px"><b>מקורות:</b> מחירי "אייל" – מהאתר של משתלת אייל, מעוגלים כלפי מעלה ל־5 ₪. לחבלבל ולאריגרון לא מצאתי מחיר באתר – לקחתי כמו שאר השתילים בעציץ 12. הכנת ניקוז, ווים ומערכת השקיה – המחירים שנתת. חבקים – הערכה שלי (בהום סנטר חבקים קטנים של חצי צול עולים 5 ₪ לארבעה באתר; למידה של צול לא מצאתי מחיר). עציץ תלוי – מהתיעוד של המרפסת ביפו.</p>';
-  h+='<p class="warn"><b>משקל:</b> אדנית רטובה עם השתילים שוקלת בערך '+LR('22–28')+' ק״ג (הערכה). כדאי לבדוק שהמעקה והמתלים מחזיקים את זה.</p>';
-  el.innerHTML=h;
-}
-(function(){ var b=document.getElementById('irrBtn'); b.setAttribute('aria-pressed',IRR?'true':'false');
-  b.addEventListener('click',function(){ IRR=!IRR; b.setAttribute('aria-pressed',IRR?'true':'false'); try{ localStorage.setItem('ayaIrr',IRR?'1':'0'); }catch(e){} renderCost(); }); })();
-renderCost();
+function renderCost(){}
 
 // ---------- SVG drawings ----------
 var C={wall:'#a19b91',wallCut:'#7d776e',plaster:'#efe9df',floor:'#f4f1ea',curb:'#c9c2b5',rail:'#3f444a',glass:'#d6e8ee',ink:'#1f2a24',mut:'#5b6a61',asm:'#b5651d',pl:'#a9b5a0',plS:'#4f7a3f',hoya:'#b07a3a',pothos:'#5d9b3a',tap:'#2f7fb5'};
@@ -905,12 +846,9 @@ function drawAll(){
 drawAll();
 
 // ---------- proposal selector ----------
-var BASE_N=4, BASE_PRICE=4700, EXTRA_PRICE=500;
-function priceNow(){ return BASE_PRICE+Math.max(0,RP.length-BASE_N)*EXTRA_PRICE; }
 function setSub(){ var el=document.getElementById('subT'); if(el) el.textContent='320 × 170, פונה מערבה. '+RP.length+' אדניות מעקה 59×19.5×22.8 ('+VARIANTS.filter(function(v){ return v.id===VAR; })[0].n.split(' · ')[0]+'; מערב '+WCNT+', דרום 1'+(NCNT?', צפון '+NCNT:'')+') ו־2 עציצים תלויים.';
-  var p=priceNow().toLocaleString('he-IL');
-  var pt=document.getElementById('priceTop'); if(pt) pt.innerHTML='סה״כ: '+RP.length+' אדניות · '+LR(p+' ₪')+'<small>כולל צמחים, ניקוז, מערכת השקיה, תכנון, הובלה, הרכבה ושתילה</small>';
-  var pc=document.getElementById('priceChip'); if(pc) pc.innerHTML=RP.length+' אדניות · '+LR(p+' ₪');
+  var pt=document.getElementById('priceTop'); if(pt) pt.textContent='סה״כ: '+RP.length+' אדניות';
+  var pc=document.getElementById('priceChip'); if(pc) pc.textContent=RP.length+' אדניות';
   var pd=document.getElementById('priceDraw'); if(pd) pd.innerHTML=pt?pt.innerHTML:''; }
 (function(){ var b=document.getElementById('optBtn'), c=document.getElementById('camchips'); if(!b||!c) return;
   b.addEventListener('click',function(){ var on=c.hidden; c.hidden=!on; b.setAttribute('aria-pressed',on?'true':'false'); }); })();
@@ -967,7 +905,7 @@ function openInfo(kind,key,spot){
 document.getElementById('plantBack').addEventListener('click',function(){ var back=CURTAB; showTab(back); if(back==='model' && LASTSHEET){ if(LASTSHEET[0]==='rp') openPlanter(LASTSHEET[1]); else openHang(LASTSHEET[1]); } });
 function openTap(){
   document.getElementById('sheetTitle').textContent='ברז גינה · נישה דרומית';
-  document.getElementById('sheetText').textContent='בגובה 40 מהרצפה, על קיר הבטון, 40 ס״מ מקו הדלת. נוח למילוי מזלף ולחיבור מחשב השקיה וטפטוף לאדניות. התקנה: '+LR('350–650 ₪')+' לפי מחירון, אם יש צינור מים בקיר.';
+  document.getElementById('sheetText').textContent='בגובה 40 מהרצפה, על קיר הבטון, 40 ס״מ מקו הדלת. נוח למילוי מזלף ולחיבור מחשב השקיה וטפטוף לאדניות.';
   document.getElementById('sheetOpts').innerHTML='';
   sheet.hidden=false; document.body.classList.add('sheetOpen');
 }
