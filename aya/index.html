@@ -846,9 +846,12 @@ function drawAll(){
 drawAll();
 
 // ---------- proposal selector ----------
+var BASE_N=4, BASE_PRICE=4700, EXTRA_PRICE=500;
+function priceNow(){ return BASE_PRICE+Math.max(0,RP.length-BASE_N)*EXTRA_PRICE; }
 function setSub(){ var el=document.getElementById('subT'); if(el) el.textContent='320 × 170, פונה מערבה. '+RP.length+' אדניות מעקה 59×19.5×22.8 ('+VARIANTS.filter(function(v){ return v.id===VAR; })[0].n.split(' · ')[0]+'; מערב '+WCNT+', דרום 1'+(NCNT?', צפון '+NCNT:'')+') ו־2 עציצים תלויים.';
-  var pt=document.getElementById('priceTop'); if(pt) pt.textContent='סה״כ: '+RP.length+' אדניות';
-  var pc=document.getElementById('priceChip'); if(pc) pc.textContent=RP.length+' אדניות';
+  var p=priceNow().toLocaleString('he-IL');
+  var pt=document.getElementById('priceTop'); if(pt) pt.innerHTML='סה״כ: '+RP.length+' אדניות · '+LR(p+' ₪')+'<small>כולל צמחים, ניקוז, מערכת השקיה, תכנון, הובלה, הרכבה ושתילה</small>';
+  var pc=document.getElementById('priceChip'); if(pc) pc.innerHTML=RP.length+' אדניות · '+LR(p+' ₪');
   var pd=document.getElementById('priceDraw'); if(pd) pd.innerHTML=pt?pt.innerHTML:''; }
 (function(){ var b=document.getElementById('optBtn'), c=document.getElementById('camchips'); if(!b||!c) return;
   b.addEventListener('click',function(){ var on=c.hidden; c.hidden=!on; b.setAttribute('aria-pressed',on?'true':'false'); }); })();
