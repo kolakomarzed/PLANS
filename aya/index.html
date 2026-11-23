@@ -402,7 +402,7 @@ var ALLRP=[];
   else if(p.side==='s') p.pt=[f==='in'?RAIL_IN_S-RP_W/2:RAIL_OUT_S+RP_W/2,128,p.z0+RP_L/2];
   else p.pt=[f==='in'?RAIL_IN_N+RP_W/2:RAIL_OUT_N-RP_W/2,128,p.z0+RP_L/2];
   ALLRP.push(p); }); });
-var WCNT=3, NCNT=1;                                               // opens on: 3 west, 1 south, 1 north, inward
+var WCNT=4, NCNT=1;                                               // opens on the fullest option: double, 4 west, 1 north
 function grps(){ var g=[WCNT===4?'w4':'w3','s']; if(NCNT===1) g.push('n1'); if(NCNT===2) g.push('n2'); return g; }
 function activeBases(){ var g=grps(); return ALLBASE.filter(function(q){ return g.indexOf(q.grp)>=0; }); }
 var VARIANTS=[
@@ -410,7 +410,7 @@ var VARIANTS=[
   {id:'out',n:'החוצה',d:'האדניות תלויות בצד החיצוני של המעקה, והצמחים נשפכים אל הרחוב. יותר שמש (התקרה מסתירה פחות) ויותר רוח.'},
   {id:'both',n:'פנימה והחוצה · כפול',d:'זוג בכל מקום: אחת פנימה ואחת החוצה, גב אל גב על המעקה. המעקה מוסתר לגמרי בצמחים משני הצדדים.'}
 ];
-var VAR='in';
+var VAR='both';
 function activeRP(){ var g=grps(); return ALLRP.filter(function(p){ return g.indexOf(p.grp)>=0 && (VAR==='both' || p.face===VAR); }); }
 var RP=activeRP();
 function midId(){ var w=RP.filter(function(p){ return p.side==='w' && p.face===(VAR==='out'?'out':'in'); }); return w[Math.floor((w.length-1)/2)].id; }
