@@ -1375,7 +1375,8 @@ function openTap(){
   // ---------- picking ----------
   var ray=new THREE.Raycaster(), ptr=new THREE.Vector2(), down=null;
   renderer.domElement.addEventListener('pointerdown',function(e){ down=[e.clientX,e.clientY]; });
-  renderer.domElement.addEventListener('pointerup',function(e){
+  var PICK=false; // client view: no planter taps
+  if(PICK) renderer.domElement.addEventListener('pointerup',function(e){
     if(!down || Math.hypot(e.clientX-down[0],e.clientY-down[1])>6) return;
     var r=renderer.domElement.getBoundingClientRect(); ptr.set(((e.clientX-r.left)/r.width)*2-1, -((e.clientY-r.top)/r.height)*2+1);
     ray.setFromCamera(ptr,camera);
