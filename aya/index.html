@@ -30,18 +30,15 @@ body{background:var(--sky);color:var(--ink);font-family:"Heebo","Arial Hebrew","
 .price{margin-top:6px;font-weight:700;font-size:1rem;color:var(--leaf)}
 .price small{display:block;font-weight:400;font-size:.74rem;color:var(--muted)}
 .pchip{font-weight:700;font-size:.85rem;color:var(--leaf);white-space:nowrap;padding:0 4px}
-.pick{flex-direction:column;align-items:stretch;gap:5px;width:min(430px,100%);padding:10px 12px}
-.qtitle{font-weight:700;font-size:.95rem;text-align:center}
-.qrow{display:flex;align-items:center;justify-content:space-between;gap:8px}
-.qlab{font-size:.86rem}
-.qfix{font-size:.86rem;color:var(--muted);padding:0 14px}
-.pick .seg{display:flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;flex:0 0 auto}
-.pick .seg button{border:0;border-radius:0;background:transparent;padding:5px 11px;min-height:32px;font-size:.84rem}
+.pick{flex-direction:column;align-items:center;gap:6px;padding:7px 10px}
+.qrow{display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:nowrap}
+.qlab{font-size:.8rem;color:var(--muted)}
+.pick .seg{display:flex;border:1px solid var(--line);border-radius:999px;overflow:hidden;flex:0 0 auto}
+.pick .seg button{border:0;border-radius:0;background:transparent;padding:4px 11px;min-height:30px;font-size:.82rem}
 .pick .seg button+button{border-inline-start:1px solid var(--line)}
 .pick .seg button[aria-pressed="true"]{background:var(--leaf);color:#fff;font-weight:700}
-.qnote{font-size:.76rem;color:var(--muted);line-height:1.35}
-.qtot{font-weight:700;color:var(--leaf);text-align:center;font-size:1.02rem;border-top:1px solid var(--line);padding-top:6px}
-.qfoot{display:flex;justify-content:center}
+.pick .qicon{padding:0;width:32px;min-height:30px;height:30px;font-size:1rem;line-height:1}
+.qtot{font-weight:700;color:var(--leaf);font-size:.9rem;white-space:nowrap;padding:0 2px}
 .head{position:fixed;top:calc(env(safe-area-inset-top,0px) + 12px);right:14px;left:14px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;pointer-events:none;z-index:3}
 .title{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:10px 14px;backdrop-filter:blur(8px);pointer-events:auto;max-width:min(60vw,420px)}
 .title h1{font-size:1.05rem;line-height:1.25;margin:0;font-weight:700}
@@ -147,14 +144,8 @@ body.sheetOpen .dock{display:none}
 
 <div class="dock">
   <div class="chips pick" id="varchips">
-    <div class="qtitle">בחרי כמה אדניות</div>
-    <div class="qrow"><span class="qlab">מעקה מערבי (הארוך)</span><div class="seg" data-k="w"><button type="button" data-v="3">3</button><button type="button" data-v="4">4</button></div></div>
-    <div class="qrow"><span class="qlab">מעקה צפוני</span><div class="seg" data-k="n"><button type="button" data-v="0">בלי</button><button type="button" data-v="1">1</button></div></div>
-    <div class="qrow"><span class="qlab">מעקה דרומי</span><span class="qfix">1</span></div>
-    <div class="qrow"><span class="qlab">צד המעקה</span><div class="seg" data-k="v"><button type="button" data-v="in">פנימה</button><button type="button" data-v="out">החוצה</button><button type="button" data-v="both">שני הצדדים</button></div></div>
-    <div class="qnote" id="qNote"></div>
-    <div class="qtot" id="priceChip"></div>
-    <div class="qfoot"><button type="button" id="optBtn" aria-pressed="false">אפשרויות תצוגה</button></div>
+    <div class="qrow"><span class="qlab">מערב</span><div class="seg" data-k="w"><button type="button" data-v="3">3</button><button type="button" data-v="4">4</button></div><span class="qlab">צפון</span><div class="seg" data-k="n"><button type="button" data-v="0">בלי</button><button type="button" data-v="1">1</button></div><button type="button" id="optBtn" class="qicon" aria-pressed="false" aria-label="אפשרויות תצוגה" title="אפשרויות תצוגה">⚙</button></div>
+    <div class="qrow"><div class="seg" data-k="v"><button type="button" data-v="in">פנימה</button><button type="button" data-v="out">החוצה</button><button type="button" data-v="both">כפול</button></div><span class="qtot" id="priceChip"></span></div>
     <div hidden><select id="varSel" aria-label="כיוון האדניות"></select><select id="wSel" aria-label="אדניות במערב"><option value="3">3</option><option value="4">4</option></select><select id="nSel" aria-label="אדניות בצפון"><option value="0">בלי</option><option value="1">1</option></select></div>
   </div>
   <div class="chips sunbar" id="sunbar" hidden>
@@ -171,7 +162,7 @@ body.sheetOpen .dock{display:none}
     <button type="button" data-tog="east" aria-pressed="false">קיר מזרחי</button>
     <button type="button" data-tog="sides" aria-pressed="false">קירות צפון ודרום</button>
   </div>
-  <div class="hint" id="hint">גוררים כדי לסובב · שתי אצבעות להתקרב · נגיעה באדנית כדי לבחור צמחים</div>
+  <div class="hint" id="hint">גררי לסיבוב · נגעי באדנית לבחירת צמחים</div>
 </div>
 
 <div id="sheet" hidden role="dialog" aria-label="פרטים">
@@ -873,7 +864,7 @@ function priceNow(){ return BASE_PRICE+Math.max(0,RP.length-BASE_N)*EXTRA_PRICE;
 function setSub(){ var el=document.getElementById('subT'); if(el) el.textContent='320 × 170, פונה מערבה. '+RP.length+' אדניות מעקה 59×19.5×22.8 ('+VARIANTS.filter(function(v){ return v.id===VAR; })[0].n.split(' · ')[0]+'; מערב '+WCNT+', דרום 1'+(NCNT?', צפון '+NCNT:'')+') ו־2 עציצים תלויים.';
   var p=priceNow().toLocaleString('he-IL');
   var pt=document.getElementById('priceTop'); if(pt) pt.innerHTML='סה״כ: '+RP.length+' אדניות · '+LR(p+' ₪')+'<small>כולל צמחים, ניקוז, מערכת השקיה, תכנון, הובלה, הרכבה ושתילה</small>';
-  var pc=document.getElementById('priceChip'); if(pc) pc.innerHTML='סה״כ: '+RP.length+' אדניות · '+LR(p+' ₪');
+  var pc=document.getElementById('priceChip'); if(pc) pc.innerHTML=RP.length+' אדניות · '+LR(p+' ₪');
   var pd=document.getElementById('priceDraw'); if(pd) pd.innerHTML=pt?pt.innerHTML:'';
   var cur={w:String(WCNT),n:String(NCNT),v:VAR};
   Array.prototype.forEach.call(document.querySelectorAll('.pick .seg'),function(g){ Array.prototype.forEach.call(g.children,function(b){ b.setAttribute('aria-pressed',b.dataset.v===cur[g.dataset.k]?'true':'false'); }); });
