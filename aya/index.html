@@ -30,6 +30,18 @@ body{background:var(--sky);color:var(--ink);font-family:"Heebo","Arial Hebrew","
 .price{margin-top:6px;font-weight:700;font-size:1rem;color:var(--leaf)}
 .price small{display:block;font-weight:400;font-size:.74rem;color:var(--muted)}
 .pchip{font-weight:700;font-size:.85rem;color:var(--leaf);white-space:nowrap;padding:0 4px}
+.pick{flex-direction:column;align-items:stretch;gap:5px;width:min(430px,100%);padding:10px 12px}
+.qtitle{font-weight:700;font-size:.95rem;text-align:center}
+.qrow{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.qlab{font-size:.86rem}
+.qfix{font-size:.86rem;color:var(--muted);padding:0 14px}
+.pick .seg{display:flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;flex:0 0 auto}
+.pick .seg button{border:0;border-radius:0;background:transparent;padding:5px 11px;min-height:32px;font-size:.84rem}
+.pick .seg button+button{border-inline-start:1px solid var(--line)}
+.pick .seg button[aria-pressed="true"]{background:var(--leaf);color:#fff;font-weight:700}
+.qnote{font-size:.76rem;color:var(--muted);line-height:1.35}
+.qtot{font-weight:700;color:var(--leaf);text-align:center;font-size:1.02rem;border-top:1px solid var(--line);padding-top:6px}
+.qfoot{display:flex;justify-content:center}
 .head{position:fixed;top:calc(env(safe-area-inset-top,0px) + 12px);right:14px;left:14px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;pointer-events:none;z-index:3}
 .title{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:10px 14px;backdrop-filter:blur(8px);pointer-events:auto;max-width:min(60vw,420px)}
 .title h1{font-size:1.05rem;line-height:1.25;margin:0;font-weight:700}
@@ -134,7 +146,17 @@ body.sheetOpen .dock{display:none}
 </div>
 
 <div class="dock">
-  <div class="chips" id="varchips"><label for="varSel" class="vlab">אדניות</label><select id="varSel" aria-label="כיוון האדניות"></select><label for="wSel" class="vlab">מערב</label><select id="wSel" aria-label="אדניות במערב"><option value="3">3</option><option value="4">4</option></select><label for="nSel" class="vlab">צפון</label><select id="nSel" aria-label="אדניות בצפון"><option value="0">בלי</option><option value="1">1</option></select><span class="pchip" id="priceChip"></span><button type="button" id="optBtn" aria-pressed="false">אפשרויות תצוגה</button></div>
+  <div class="chips pick" id="varchips">
+    <div class="qtitle">בחרי כמה אדניות</div>
+    <div class="qrow"><span class="qlab">מעקה מערבי (הארוך)</span><div class="seg" data-k="w"><button type="button" data-v="3">3</button><button type="button" data-v="4">4</button></div></div>
+    <div class="qrow"><span class="qlab">מעקה צפוני</span><div class="seg" data-k="n"><button type="button" data-v="0">בלי</button><button type="button" data-v="1">1</button></div></div>
+    <div class="qrow"><span class="qlab">מעקה דרומי</span><span class="qfix">1</span></div>
+    <div class="qrow"><span class="qlab">צד המעקה</span><div class="seg" data-k="v"><button type="button" data-v="in">פנימה</button><button type="button" data-v="out">החוצה</button><button type="button" data-v="both">שני הצדדים</button></div></div>
+    <div class="qnote" id="qNote"></div>
+    <div class="qtot" id="priceChip"></div>
+    <div class="qfoot"><button type="button" id="optBtn" aria-pressed="false">אפשרויות תצוגה</button></div>
+    <div hidden><select id="varSel" aria-label="כיוון האדניות"></select><select id="wSel" aria-label="אדניות במערב"><option value="3">3</option><option value="4">4</option></select><select id="nSel" aria-label="אדניות בצפון"><option value="0">בלי</option><option value="1">1</option></select></div>
+  </div>
   <div class="chips sunbar" id="sunbar" hidden>
     <div class="sunrow"><input type="date" id="sunDate" aria-label="תאריך"><select id="sunPreset" aria-label="תאריכים קבועים"><option value="">תאריך…</option><option value="today">היום</option><option value="12-21">21.12 · היום הקצר</option><option value="03-20">20.3 · אביב</option><option value="06-21">21.6 · היום הארוך</option><option value="09-22">22.9 · סתיו</option></select><button type="button" id="sunPlay" aria-label="הפעלה">▶</button></div>
     <div class="sunrow"><input type="range" id="sunTime" min="5" max="20.5" step="any" value="15" aria-label="שעה"><span id="sunRead"></span></div>
@@ -851,8 +873,14 @@ function priceNow(){ return BASE_PRICE+Math.max(0,RP.length-BASE_N)*EXTRA_PRICE;
 function setSub(){ var el=document.getElementById('subT'); if(el) el.textContent='320 × 170, פונה מערבה. '+RP.length+' אדניות מעקה 59×19.5×22.8 ('+VARIANTS.filter(function(v){ return v.id===VAR; })[0].n.split(' · ')[0]+'; מערב '+WCNT+', דרום 1'+(NCNT?', צפון '+NCNT:'')+') ו־2 עציצים תלויים.';
   var p=priceNow().toLocaleString('he-IL');
   var pt=document.getElementById('priceTop'); if(pt) pt.innerHTML='סה״כ: '+RP.length+' אדניות · '+LR(p+' ₪')+'<small>כולל צמחים, ניקוז, מערכת השקיה, תכנון, הובלה, הרכבה ושתילה</small>';
-  var pc=document.getElementById('priceChip'); if(pc) pc.innerHTML=RP.length+' אדניות · '+LR(p+' ₪');
-  var pd=document.getElementById('priceDraw'); if(pd) pd.innerHTML=pt?pt.innerHTML:''; }
+  var pc=document.getElementById('priceChip'); if(pc) pc.innerHTML='סה״כ: '+RP.length+' אדניות · '+LR(p+' ₪');
+  var pd=document.getElementById('priceDraw'); if(pd) pd.innerHTML=pt?pt.innerHTML:'';
+  var cur={w:String(WCNT),n:String(NCNT),v:VAR};
+  Array.prototype.forEach.call(document.querySelectorAll('.pick .seg'),function(g){ Array.prototype.forEach.call(g.children,function(b){ b.setAttribute('aria-pressed',b.dataset.v===cur[g.dataset.k]?'true':'false'); }); });
+  var qn=document.getElementById('qNote'); if(qn) qn.textContent=VARIANTS.filter(function(v){ return v.id===VAR; })[0].d; }
+(function(){ var map={w:'wSel',n:'nSel',v:'varSel'};
+  Array.prototype.forEach.call(document.querySelectorAll('.pick .seg'),function(g){ g.addEventListener('click',function(e){ var b=e.target.closest('button'); if(!b) return;
+    var sel=document.getElementById(map[g.dataset.k]); sel.value=b.dataset.v; sel.dispatchEvent(new Event('change')); }); }); })();
 (function(){ var b=document.getElementById('optBtn'), c=document.getElementById('camchips'); if(!b||!c) return;
   b.addEventListener('click',function(){ var on=c.hidden; c.hidden=!on; b.setAttribute('aria-pressed',on?'true':'false'); }); })();
 function setVariant(id){ VAR=id; RP=activeRP(); buildSpots(); closeSheet();
